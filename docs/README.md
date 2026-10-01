@@ -11,10 +11,12 @@ After you change any code, click ↻ on the extension card, then **refresh the M
 
 ## Develop
 ```bash
-npm run setup     # one time: installs Playwright + Chromium
-npm test          # runs the mock-Meet browser tests
-npm run package   # builds dist/meet-spark-<version>.zip
+npm run setup     # one time: dependencies, Playwright Chromium, git hooks
+npm run verify    # everything: syntax, lint, guardrails, all tests
+npm test          # tests only
+npm run package   # verify, then build dist/meet-spark-<version>.zip
 ```
+Guardrails run automatically: lint and guard on every commit, full verify on every push and in CI. See `docs/GUARDRAILS.md`.
 
 ## Project layout
 ```

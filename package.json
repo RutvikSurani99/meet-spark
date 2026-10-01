@@ -6,10 +6,17 @@
   "scripts": {
     "test": "node tests/run.js",
     "check": "node --check extension/content.js",
-    "package": "bash scripts/package.sh",
-    "setup": "npm install && npx playwright install chromium"
+    "lint": "eslint .",
+    "guard": "node scripts/guard.js",
+    "verify": "npm run check && npm run lint && npm run guard && npm test",
+    "package": "npm run verify && bash scripts/package.sh",
+    "setup": "npm install && npx playwright install chromium",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "eslint": "^9.39.0",
+    "globals": "^15.15.0",
     "playwright": "^1.47.0"
   }
 }

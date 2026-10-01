@@ -1,3 +1,4 @@
+/* global PEOPLE */ // defined by the mock page's inline script
 const assert = require('assert');
 const { chromium } = require('playwright');
 (async()=>{

@@ -173,7 +173,9 @@
     }
   } catch (e) { console.warn("[Meet Spark] Trusted Types policy unavailable", e); }
   function setHTML(el, html) {
+    // eslint-disable-next-line no-restricted-syntax -- G2-REVIEWED: TT-safe sink inside setHTML() (value is a TrustedHTML from ttPolicy)
     if (ttPolicy) { el.innerHTML = ttPolicy.createHTML(html); return; }
+    // eslint-disable-next-line no-restricted-syntax -- G2-REVIEWED: TT-safe sink inside setHTML() (throws under TT, then falls back to buildDOM)
     try { el.innerHTML = html; return; } catch (e) { /* fall through */ }
     // Strictest CSP: build the DOM ourselves (no HTML parsing sinks at all).
     el.replaceChildren(buildDOM(html));
@@ -508,6 +510,7 @@
     setSyncState(true);
     const wasOpen = !!participantsList();
     try {
+      // eslint-disable-next-line no-restricted-syntax -- G1-REVIEWED: btn comes from peopleButton(), which only returns safeCandidate() elements
       if (!wasOpen) btn.click();
       for (let i = 0; i < 30 && !participantsList(); i++) await sleep(100);
       await sleep(400); // let the list render
@@ -515,6 +518,7 @@
       const list = participantsList();
       if (list) {
         // Expand collapsed groups (e.g. "Contributors")
+        // eslint-disable-next-line no-restricted-syntax -- KNOWN-F1: not checked by safeCandidate(); fix in Phase 0 (docs/GUARDRAILS.md §5)
         qa('[aria-expanded="false"]', list.parentElement || list).forEach((b) => b.click());
         await sleep(200);
         // Scroll through virtualised lists so every row renders
@@ -545,6 +549,7 @@
     } finally {
       if (!wasOpen) {
         const opened = !!participantsList();
+        // eslint-disable-next-line no-restricted-syntax -- G1-REVIEWED: re-clicks the same safeCandidate() People button to undo our own click (GR-3 sync rule)
         btn.click(); // close the panel we opened (or undo an unexpected click)
         if (!opened) {
           syncPaused = true;

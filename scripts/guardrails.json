@@ -1,0 +1,12 @@
+{
+  "_comment": "PROTECTED FILE — see docs/GUARDRAILS.md. Every eslint-disable in extension/ must be listed here (GR-4).",
+  "allowedPermissions": ["storage"],
+  "allowedMatches": ["https://meet.google.com/*"],
+  "requiredUnsafeWords": ["let", "allow", "turn", "send", "message", "chat", "mute", "remove", "lock", "admit", "deny", "host", "settings", "option", "access"],
+  "rootMarkdownAllowed": ["CLAUDE.md"],
+  "suppressions": [
+    { "file": "extension/content.js", "rule": "no-restricted-syntax", "tag": "G2-REVIEWED", "count": 2, "why": "setHTML() is the single TT-safe HTML sink" },
+    { "file": "extension/content.js", "rule": "no-restricted-syntax", "tag": "G1-REVIEWED", "count": 2, "why": "fullSync() opens/closes the safeCandidate() People button" },
+    { "file": "extension/content.js", "rule": "no-restricted-syntax", "tag": "KNOWN-F1", "count": 1, "why": "Known unsafe aria-expanded click; remove this entry when F1 is fixed", "knownIssue": "F1" }
+  ]
+}

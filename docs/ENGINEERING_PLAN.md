@@ -11,6 +11,9 @@ This plan moves Meet Spark from a working prototype (a single 1,080-line `conten
 
 ## 0. Working rules
 
+> **Update 2026-10-01:** Layer 0 guardrails for the current JS code are live. See `docs/GUARDRAILS.md`. The §4 guardrails below are their TypeScript and React successors.
+
+
 1. **Docs first.** No code change starts until the docs that describe it are updated and approved. The order is always **docs/spec → approval → tests → code → notes/changelog**.
 2. **All docs live in `docs/`.** That includes README, CONTRIBUTING, SECURITY, CHANGELOG, specs and ADRs. GitHub recognises `docs/README.md`, `docs/CONTRIBUTING.md` and `docs/SECURITY.md` automatically.
    *One exception:* a 2-line root `CLAUDE.md` stub that imports `docs/CLAUDE.md`. Claude Code only auto-loads instructions from the repo root, so the stub has to stay there.

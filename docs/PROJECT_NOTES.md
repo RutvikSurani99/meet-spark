@@ -72,13 +72,19 @@ To release, bump `version` in `extension/manifest.json` and `package.json`, then
 - Detection in that setup relies on `scanAvatars()` (googleusercontent images) plus the user opening the People panel and tapping sync.
 - To fix selectors from a new report, use its `peopleLikeControls`, `dataAttrs`, `roles`, `regions` and `noTranslate` fields, then add a mock variant to `tests/markup-variants.test.js`.
 
+## Guardrails (Layer 0, active)
+See `docs/GUARDRAILS.md`. Run `npm run verify` (check, lint, guard, 7 test files: 16 feature tests, content policy, 4 sync/detection tests, safety, Trusted Types). Hooks: pre-commit (check, lint, guard, content policy) and pre-push (verify). Baseline tag: `v2.5.0-baseline`.
+Browser tests can't download Chromium inside Cowork's sandbox on this Mac, so Claude runs them in the cloud workspace. On the Mac itself, `npm run setup` works normally.
+
 ## Current state (2026-10-01)
 - `npm run check` passes.
-- `node_modules` isn't installed, so the tests can't run until `npm run setup` has been run.
-- Git repo is initialised on `main` with **no commits yet**; every file is untracked.
+- Dependencies are installed and git hooks are on (`core.hooksPath=.githooks`).
+- Git: baseline commit `8ee14fc`, tagged `v2.5.0-baseline`, then the guardrails commit.
+- Still to add by hand: `.github/workflows/ci.yml` and `.claude/settings.json`. Cowork can't write protected folders, so these are in the chat outputs.
 - Node v22 is available.
 
 ## Change log
 - 2026-10-01: Reference file created.
 - 2026-10-01: Engineering plan proposed in `docs/ENGINEERING_PLAN.md` (TypeScript + esbuild, GitHub solo, spec-driven). Found F1: `fullSync()` clicks `[aria-expanded="false"]` without `safeCandidate()`.
 - 2026-10-01: Plan v2: WXT + React + TypeScript, localhost playground, docs-first rule. Moved README, CLAUDE.md and PROJECT_NOTES into `docs/`; root `CLAUDE.md` is now a stub that imports `docs/CLAUDE.md`.
+- 2026-10-01: Layer 0 guardrails added (GR-1…GR-11): ESLint rules, guard script + suppression ledger, content-policy test, 16-test feature regression suite, git hooks, CI workflow and Claude Code settings. 15 deliberate breakages were all caught.

@@ -8,12 +8,18 @@ Chrome extension (Manifest V3) that adds engagement tools to Google Meet. It has
 - Read `docs/PROJECT_NOTES.md` and the relevant `docs/specs/*.md` before starting work.
 
 ## Commands
-- `npm run setup`: one-time install of Playwright and Chromium
-- `npm test`: runs every `tests/*.test.js` against mock Meet pages (headless Chromium)
+- `npm run setup`: one-time install of dependencies and Playwright Chromium. It also turns on the git hooks.
+- `npm run verify`: **the single gate**. Runs check, lint, guard and every test. Run it before saying any change is done, and report its output.
+- `npm run lint`: ESLint with the guardrail rules (GR-2, GR-3, GR-5)
+- `npm run guard`: repo invariants: manifest lock, `UNSAFE_LABEL` strictness, suppression ledger, docs layout
+- `npm test`: every `tests/*.test.js` (feature regression suite, content policy, sync, safety, Trusted Types)
 - `npm run check`: syntax check of `extension/content.js`
-- `npm run package`: builds `dist/meet-spark-<version>.zip`
+- `npm run package`: runs verify, then builds `dist/meet-spark-<version>.zip`
 
-Run `npm run check && npm test` after every change to `content.js`.
+## Guardrails (read docs/GUARDRAILS.md)
+- **Never weaken a guardrail to make a change pass.** That means no new `eslint-disable`, no edits to the ledger, no loosened or deleted assertions, no `--no-verify`. If a guardrail blocks you, stop and explain why, then propose an ADR.
+- **Protected files** (ask the user before editing): `eslint.config.js`, `scripts/guard.js`, `scripts/guardrails.json`, `tests/safety.test.js`, `tests/content-policy.test.js`, `tests/features.test.js`, `.githooks/*`, `.github/workflows/*`, `.claude/settings.json`. Adding new tests is always fine.
+- Every new or changed feature needs a row in the coverage map (`docs/GUARDRAILS.md` §3) and a test that fails before the code change.
 
 ## Architecture (all in `extension/content.js`)
 1. **Content**: `ICEBREAKERS` (by category), `WYR`, `BINGO` arrays at the top. Keep them India-friendly (chai, cricket, festivals, trains, monsoon, office phrases like "Am I audible?"). Avoid religion, politics, caste and region-vs-region comparisons.
