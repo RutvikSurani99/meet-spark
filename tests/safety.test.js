@@ -1,0 +1,10 @@
+const assert = require('assert');
+const { chromium } = require('playwright');
+(async()=>{ const b=await chromium.launch(); const p=await b.newPage();
+ await p.setContent(`<button aria-label="Let participants send messages" onclick="window.clicked=(window.clicked||0)+1">x</button><button aria-label="Leave call">call_end</button><button aria-label="Chat with everyone">chat</button><button aria-label="Host controls">x</button>`);
+ await p.addScriptTag({path:require('path').join(__dirname,'../extension/content.js')}); await p.waitForTimeout(8000);
+ const msgs=[]; p.on('console',m=>msgs.push(m.text()));
+ assert.strictEqual(await p.evaluate(()=>window.clicked||0),0,'unsafe button was clicked'); console.log('wrong button clicked:', await p.evaluate(()=>window.clicked||0));
+ await p.evaluate(()=>document.getElementById('meet-spark-host').shadowRoot.querySelector('#diagBtn').click()); await p.waitForTimeout(300);
+ const d=JSON.parse(msgs.join('').replace(/^\[Meet Spark\] diagnostics /,'')); assert.strictEqual(d.peopleButton,null); console.log('PASS safety', d.peopleButton, 'peopleLike', d.peopleLikeControls.length);
+ await b.close();})();
