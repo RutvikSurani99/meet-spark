@@ -1,5 +1,5 @@
 # Guardrails hardening (Layer 0.5) — Spec
-ID prefix: GRH · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: GRH · Status: **Implemented** (2026-10-04; GRH-002 GitHub setup is still a manual step) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Related: `docs/GUARDRAILS.md`, `docs/ENGINEERING_PLAN.md` §4–5, audit of 2026-10-04
 
 ## Problem / goal
@@ -98,7 +98,7 @@ Each new test locks **current, correct** behaviour, so it passes on today's code
 |----|---|---|---|
 | GRH-070 | MUST make every `docs/...` path mentioned in `docs/CLAUDE.md` and `docs/GUARDRAILS.md` exist. Create `docs/CHANGELOG.md` (Keep a Changelog). Create `docs/specs/` (done: `_TEMPLATE.md`, this file, the fixes spec). `docs/adr/` and `ARCHITECTURE.md` are created in Phase 1; until then, `docs/CLAUDE.md` says "(Phase 1)" next to them | Guard fails on a dangling `docs/` path reference | guard |
 | GRH-071 | MUST replace the line-number map in `PROJECT_NOTES.md` with a function-name map (line numbers drift after every edit) | No `| 123–456 |` style rows remain | review |
-| GRH-072 | MUST add a `## Spec traceability` check (`npm run trace`, also run by guard). For every spec with status Approved or Implemented, every requirement ID whose test level isn't `manual`/`process`/`review` must appear in a test name, guard check or CI job | Given an approved ID with no test, then guard fails | guard |
+| GRH-072 | MUST add a spec traceability check, run by guard (`npm run spec:check` lists specs). For every spec with status **Implemented**, every requirement ID whose test level isn't `manual`/`process`/`review` must appear in a test, guard check or CI job. For **Approved** specs, the guard only warns, so the docs-first approval commit can land before the code | Given an Implemented spec with an untested ID, then guard fails. Given an Approved spec, then guard warns with the list of pending IDs | guard |
 | GRH-073 | MUST update `GUARDRAILS.md`: add GR-12 (mutation gate), GR-13 (traceability), GR-14 (protected-file lock), GR-15 (click recorder); extend §3 and §4 | Docs reviewed | review |
 
 ## Edge cases
@@ -125,3 +125,5 @@ Each new test locks **current, correct** behaviour, so it passes on today's code
 ## Changelog
 - 2026-10-04 v1: Draft, written from the mutation audit.
 - 2026-10-04 v1: Approved. Open questions resolved with the defaults above.
+- 2026-10-04 v1.1: GRH-072 enforces traceability on Implemented specs and warns on Approved ones (enforcing on Approved would block the docs-first approval commit).
+- 2026-10-04 v1.2: Implemented. Notes: GRH-022's class-name check applies to the Meet helpers `q()`/`qa()` only (Spark's own Shadow DOM uses short class names); the mutation gate starts with 26 mutants (M1–M12 plus one per v2.5.1 fix) and found one more gap (M8, fullSync re-entry), which is now covered by SYNC-REENTRY; `isAllowedClick()` allows `aria-pressed` on the People button only (see v2.5.1-fixes SAFE-001).
