@@ -19,7 +19,7 @@ async function test(name, fn) {
   let failed = null;
   try {
     // ---------------- Launcher & panel ----------------
-    await test("LAUNCH-1 host mounts exactly once and launcher is visible", async () => {
+    await test("LAUNCH-1 host mounts exactly once and launcher is visible [LAUNCH-001]", async () => {
       const { page, errors, context } = await fresh();
       assert.strictEqual(await page.evaluate(() => document.querySelectorAll("#meet-spark-host").length), 1);
       assert.strictEqual(await text(page, "#launcher span"), "Spark");
@@ -27,7 +27,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("LAUNCH-2 launcher, Close button and Alt+S toggle the panel", async () => {
+    await test("LAUNCH-2 launcher, Close button and Alt+S toggle the panel [LAUNCH-003]", async () => {
       const { page, context } = await fresh();
       const isOpen = () => ui(page, (r) => r.querySelector("#panel").classList.contains("open"));
       assert.strictEqual(await isOpen(), false);
@@ -38,7 +38,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("TABS-1 each tab shows its view and the last tab is remembered", async () => {
+    await test("TABS-1 each tab shows its view and the last tab is remembered [LAUNCH-004]", async () => {
       const { page, context, inject } = await fresh();
       for (const v of ["wyr", "bingo", "people", "ice"]) {
         await click(page, `.nav [data-v=${v}]`);
@@ -54,13 +54,13 @@ async function test(name, fn) {
     });
 
     // ---------------- Icebreakers ----------------
-    await test("ICE-1 shows the 4 categories in order", async () => {
+    await test("ICE-1 shows the 4 categories in order [ICE-001]", async () => {
       const { page, context } = await fresh();
       assert.deepStrictEqual(await ui(page, (r) => [...r.querySelectorAll("#cats .chip")].map((c) => c.textContent)), ["Warm-up", "Work", "Fun", "Reflective"]);
       await context.close();
     });
 
-    await test("ICE-2 questions come from the chosen category, no repeats until the deck is used up", async () => {
+    await test("ICE-2 questions come from the chosen category, no repeats until the deck is used up [ICE-002, ICE-003, ICE-004]", async () => {
       const { page, context } = await fresh();
       for (const cat of Object.keys(ICEBREAKERS)) {
         await ui(page, (r, c) => r.querySelector(`#cats .chip[data-c="${c}"]`).click(), cat);
@@ -76,7 +76,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("ICE-3 Ask addresses an active participant", async () => {
+    await test("ICE-3 Ask addresses an active participant [ICE-005]", async () => {
       const { page, context } = await fresh();
       await ui(page, (r) => { const i = r.querySelector("#addName"); i.value = "Asha Rao"; r.querySelector("#addBtn").click(); });
       await click(page, "#iceAsk");
@@ -86,7 +86,7 @@ async function test(name, fn) {
     });
 
     // ---------------- This or that ----------------
-    await test("WYR-1 shows real pairs with no repeats across the whole deck", async () => {
+    await test("WYR-1 shows real pairs with no repeats across the whole deck [WYR-001, WYR-002]", async () => {
       const { page, context } = await fresh();
       const seen = new Set();
       for (let i = 0; i < WYR.length; i++) {
@@ -100,7 +100,7 @@ async function test(name, fn) {
     });
 
     // ---------------- Bingo ----------------
-    await test("BINGO-1 card has 25 cells, FREE centre, 24 unique real items", async () => {
+    await test("BINGO-1 card has 25 cells, FREE centre, 24 unique real items [BINGO-001]", async () => {
       const { page, context } = await fresh();
       const cells = await ui(page, (r) => [...r.querySelectorAll("#grid .cell")].map((c) => c.textContent));
       assert.strictEqual(cells.length, 25);
@@ -111,7 +111,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("BINGO-2 marking cells, scoring a line, persisting and New card", async () => {
+    await test("BINGO-2 marking cells, scoring a line, persisting and New card [BINGO-002, BINGO-004, BINGO-006, BINGO-007]", async () => {
       const { page, context, inject } = await fresh();
       const cell = (i) => ui(page, (r, n) => r.querySelectorAll("#grid .cell")[n].click(), i);
       await cell(0);
@@ -135,7 +135,7 @@ async function test(name, fn) {
     });
 
     // ---------------- Speakers: names ----------------
-    await test("SPK-1 add (button + Enter), sorted list, badge, persisted per meeting", async () => {
+    await test("SPK-1 add (button + Enter), sorted list, badge, persisted per meeting [SPK-001, SPK-004, LAUNCH-005]", async () => {
       const { page, context, inject } = await fresh();
       await click(page, "#launcher"); // input must be visible to take keyboard focus
       await click(page, ".nav [data-v=people]");
@@ -157,7 +157,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("SPK-2 remove and exclude", async () => {
+    await test("SPK-2 remove and exclude [SPK-004, SPK-006, SPK-007]", async () => {
       const { page, context } = await fresh();
       for (const n of ["Asha Rao", "Priya Nair", "Vikram Singh"]) await ui(page, (r, v) => { r.querySelector("#addName").value = v; r.querySelector("#addBtn").click(); }, n);
       await ui(page, (r) => r.querySelector('#people .person[data-n="Priya Nair"] .rm').click());
@@ -168,7 +168,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("SPK-3 HTML in a name is shown as text, never parsed", async () => {
+    await test("SPK-3 HTML in a name is shown as text, never parsed [SPK-009]", async () => {
       const { page, context, errors } = await fresh();
       const evil = '<img src=x onerror="window.__pwned=1">';
       await ui(page, (r, v) => { r.querySelector("#addName").value = v; r.querySelector("#addBtn").click(); }, evil);
@@ -180,7 +180,7 @@ async function test(name, fn) {
     });
 
     // ---------------- Speakers: picking ----------------
-    await test("SPK-4 'Everyone once' picks each active person once, never an excluded one, then restarts", async () => {
+    await test("SPK-4 'Everyone once' picks each active person once, never an excluded one, then restarts [SPK-011, SPK-013, ICE-005]", async () => {
       const { page, context } = await fresh();
       for (const n of ["Asha Rao", "Priya Nair", "Vikram Singh", "Meera Iyer"]) await ui(page, (r, v) => { r.querySelector("#addName").value = v; r.querySelector("#addBtn").click(); }, n);
       await ui(page, (r) => r.querySelector('#people .person[data-n="Meera Iyer"] .toggle').click()); // exclude
@@ -195,7 +195,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("SPK-5 Pick animation lands on a real name; Reset clears the round", async () => {
+    await test("SPK-5 Pick animation lands on a real name; Reset clears the round [SPK-014, SPK-016]", async () => {
       const { page, context } = await fresh();
       for (const n of ["Asha Rao", "Priya Nair"]) await ui(page, (r, v) => { r.querySelector("#addName").value = v; r.querySelector("#addBtn").click(); }, n);
       await click(page, ".nav [data-v=people]");
@@ -209,7 +209,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("SPK-6 no participants: picking asks you to add names", async () => {
+    await test("SPK-6 no participants: picking asks you to add names [SPK-015]", async () => {
       const { page, context } = await fresh();
       await click(page, "#pickBtn");
       assert.match(await text(page, "#snack"), /No participants yet/);
@@ -217,7 +217,7 @@ async function test(name, fn) {
     });
 
     // ---------------- Settings ----------------
-    await test("SET-1 auto-sync switch toggles and persists", async () => {
+    await test("SET-1 auto-sync switch toggles and persists [SYNC-104]", async () => {
       const { page, context } = await fresh();
       const on = () => ui(page, (r) => r.querySelector("#autoSync").classList.contains("on"));
       assert.strictEqual(await on(), true);
@@ -230,7 +230,7 @@ async function test(name, fn) {
     });
 
     // ---------------- Added by docs/specs/guardrails-hardening.md (GRH-040..044) ----------------
-    await test("BINGO-3 all 12 lines score (5 rows, 5 columns, 2 diagonals) and FREE counts", async () => {
+    await test("BINGO-3 all 12 lines score (5 rows, 5 columns, 2 diagonals) and FREE counts [BINGO-003, GRH-040]", async () => {
       const { page, context } = await fresh();
       const LINES = [];
       for (let i = 0; i < 5; i++) { LINES.push([0, 1, 2, 3, 4].map((j) => i * 5 + j)); LINES.push([0, 1, 2, 3, 4].map((j) => j * 5 + i)); }
@@ -256,7 +256,7 @@ async function test(name, fn) {
         if(s.childElementCount){s.replaceChildren();return;}
         s.innerHTML='<div role="list" aria-label="Participants">'+PEOPLE.map(n=>'<div role="listitem" aria-label="'+n+'">'+n+'</div>').join('')+'</div>';};</script></body>`;
 
-    await test("SET-2 auto-sync OFF never clicks the People button; ON does", async () => {
+    await test("SET-2 auto-sync OFF never clicks the People button; ON does [SYNC-104, GRH-041]", async () => {
       const { page, context } = await openMeet({ browser, clock: true, body: PANEL_PAGE(["Rutvik Bharat (You)", "Asha Rao", "Vikram Singh"]) });
       await click(page, "#autoSync"); // OFF before the first automatic sync
       await tick(page, 20000);
@@ -270,7 +270,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("DIAG-1 Diagnose report masks participant names", async () => {
+    await test("DIAG-1 Diagnose report masks participant names [DIAG-103, GRH-042]", async () => {
       const people = ["Rutvik Bharat (You)", "Asha Rao", "Vikram Singh", "Priya Nair"];
       const { page, context } = await openMeet({ browser, clock: true, body: PANEL_PAGE(people) + "<div data-participant-id='b'><span class='notranslate'>Priya Nair</span></div>" });
       await tick(page, 10000);
@@ -280,7 +280,7 @@ async function test(name, fn) {
       await context.close();
     });
 
-    await test("ROSTER-EXP passively seen names expire after 90 s, not before (ROSTER-003, GRH-043)", async () => {
+    await test("ROSTER-EXP passively seen names expire after 90 s, not before (ROSTER-003, GRH-043) [SYNC-101]", async () => {
       const body = `<body><button aria-label="Leave call">call_end</button>
         <div data-participant-id="a"><span class="notranslate">Asha Rao</span></div>
         <div data-participant-id="b" id="v"><span class="notranslate">Vikram Singh</span></div></body>`;
@@ -296,7 +296,7 @@ async function test(name, fn) {
     });
 
     // GRH-044
-    await test("SPK-7 Pick never lands on an excluded or removed name", async () => {
+    await test("SPK-7 Pick never lands on an excluded or removed name [SPK-013, GRH-044]", async () => {
       const { page, context } = await openMeet({ browser, clock: true });
       for (const n of ["Asha Rao", "Priya Nair", "Vikram Singh", "Meera Iyer"]) await addName(page, n);
       await ui(page, (r) => r.querySelector('#people .person[data-n="Meera Iyer"] .toggle').click()); // exclude

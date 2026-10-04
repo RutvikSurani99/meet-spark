@@ -1,5 +1,5 @@
 # Auto-sync and manual sync — Spec
-ID prefix: SYNC (baseline rows numbered SYNC-101+; SYNC-001…004 live in `v2.5.1-fixes.md`) · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: SYNC (baseline rows numbered SYNC-101+; SYNC-001…004 live in `v2.5.1-fixes.md`) · Status: **Implemented** (2026-10-04) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -35,3 +35,4 @@ Every sync click goes through `safeClick()`. SYNC-103 limits how often Spark ope
 - 2026-10-04 v1: Draft (backfill).
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
 - 2026-10-04 v1.1: SYNC-102 corrected while writing its test. The first sync comes at the first watcher tick when the headcount is readable and doesn't match; the 4 s wait applies only otherwise. **Flagged for Rutvik's review** (text-only correction; behaviour unchanged, as approved).
+- 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).

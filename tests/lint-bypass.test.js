@@ -67,7 +67,7 @@ const MUST_PASS = [
   for (const code of MUST_FAIL) if (!(await lint(code)).length) escaped.push(code);
   const flagged = [];
   for (const code of MUST_PASS) { const m = await lint(code); if (m.length) flagged.push(`${code} → ${m[0].message}`); }
-  console.log(`  ${escaped.length ? "✗" : "✓"} LINT-1 ${MUST_FAIL.length} banned patterns are all reported`);
+  console.log(`  ${escaped.length ? "✗" : "✓"} LINT-1 ${MUST_FAIL.length} banned patterns are all reported [GRH-020, GRH-021, GRH-022, GRH-023, DETECT-001]`);
   console.log(`  ${flagged.length ? "✗" : "✓"} LINT-2 ${MUST_PASS.length} ordinary patterns stay legal`);
   assert.deepStrictEqual(escaped, [], "lint rules no longer catch:\n" + escaped.join("\n"));
   assert.deepStrictEqual(flagged, [], "lint rules wrongly flag:\n" + flagged.join("\n"));

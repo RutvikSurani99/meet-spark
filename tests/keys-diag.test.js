@@ -7,7 +7,7 @@ const { test, run } = suite("keys-diag");
 let browser;
 const isOpen = (page) => ui(page, (r) => r.querySelector("#panel").classList.contains("open"));
 
-test("KEYS-001 Alt+S is ignored while typing, with Ctrl/Cmd/AltGr, and on key repeat", async () => {
+test("KEYS-001 Alt+S is ignored while typing, with Ctrl/Cmd/AltGr, and on key repeat [LAUNCH-003]", async () => {
   const body = `<body><textarea id="chat" aria-label="Send a message"></textarea><div id="ce" contenteditable="true">x</div><input id="inp">
     <script>window.prevented = []; window.addEventListener("keydown", (e) => { if (e.code === "KeyS") window.prevented.push(e.defaultPrevented); });</script></body>`;
   const { page, close } = await openMeet({ browser, body });
@@ -29,7 +29,7 @@ test("KEYS-001 Alt+S is ignored while typing, with Ctrl/Cmd/AltGr, and on key re
   await close();
 });
 
-test("DIAG-001 Diagnose redacts names inside control labels and the meeting code", async () => {
+test("DIAG-001 Diagnose redacts names inside control labels and the meeting code [DIAG-102, DIAG-103]", async () => {
   const body = `<body><button aria-label="Leave call">call_end</button>
     <div data-participant-id="a" aria-label="Asha Rao"><span class="notranslate">Asha Rao</span>
       <button aria-label="Pin Asha Rao">keep</button><button aria-label="More options for Asha Rao">more_vert</button></div>

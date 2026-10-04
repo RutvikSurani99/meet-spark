@@ -23,7 +23,7 @@ for (const f of files) {
 }
 const secs = ((Date.now() - t0) / 1000).toFixed(1);
 console.log(`\n${files.length - failed}/${files.length} test files passed · ${total} tests · ${secs} s`);
-// GRH-063: keep the suite fast. On CI, warn above 60 s and fail above 120 s.
+// GRH-063 / COV-005: keep the suite fast. On CI, warn above 60 s and fail above 120 s.
 if (process.env.CI && !only.length) {
   if (+secs > 120) { console.error(`✗ GRH-063: the test suite took ${secs} s (limit 120 s) — remove real waits, use the fake clock`); failed++; }
   else if (+secs > 60) console.warn(`⚠ GRH-063: the test suite took ${secs} s (target under 60 s)`);

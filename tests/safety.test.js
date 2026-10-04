@@ -49,7 +49,7 @@ async function syncEverything(page) {
   await diagnose(page);
 }
 
-test("SAFETY-1 unsafe-only page: nothing is clicked and Diagnose finds no People button", async () => {
+test("SAFETY-1 unsafe-only page: nothing is clicked and Diagnose finds no People button [DIAG-104, GRH-033]", async () => {
   const body = `<body><button aria-label="Let participants send messages" data-trap="x">x</button><button aria-label="Leave call">call_end</button>
     <button aria-label="Chat with everyone" data-trap="y">chat</button><button aria-label="Host controls" data-trap="z">x</button></body>`;
   const { page, close } = await openMeet({ browser, clock: true, body });
@@ -59,7 +59,7 @@ test("SAFETY-1 unsafe-only page: nothing is clicked and Diagnose finds no People
   await close();
 });
 
-test("SAFETY-2 trap page: auto-sync, manual sync and Diagnose never click a trap (GRH-031)", async () => {
+test("SAFETY-2 trap page: auto-sync, manual sync and Diagnose never click a trap (GRH-031) [GRH-033]", async () => {
   const { page, close } = await openMeet({ browser, clock: true, body: trapPage() });
   await syncEverything(page);
   assert.strictEqual(await page.evaluate(() => window.trapped || 0), 0, "a trap control was clicked");
@@ -172,7 +172,7 @@ const TABLE = [
   [`<span id="lb">People</span><button aria-labelledby="lb">x</button>`, "…"],
 ];
 
-test("SAFE-TABLE People-button detection accepts only safe People controls (GRH-032)", async () => {
+test("SAFE-TABLE People-button detection accepts only safe People controls (GRH-032) [DIAG-104, SAFE-004, GRH-033]", async () => {
   const { page, close } = await openMeet({ browser, clock: true, body: `<body><button aria-label="Leave call">call_end</button><div id="slot"></div></body>` });
   const wrong = [];
   for (const [markup, expect] of TABLE) {

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// PROTECTED FILE — GR-12 mutation gate (GRH-050, GRH-051, GRH-052). Proves the guardrails catch real mistakes.
+// PROTECTED FILE — GR-12 mutation gate (GRH-050, GRH-051, GRH-052; COV-003 backfill mutants "COV-Pnn"). Proves the guardrails catch real mistakes.
 // For each mutant in scripts/mutants.json: copy the repo to a temp dir, apply one deliberate bug,
 // then run lint → guard → the mutant's `killedBy` test files. The mutant must be KILLED (something fails).
 // A surviving mutant means a guardrail has a hole. Exit code 1 if any mutant survives or no longer applies.

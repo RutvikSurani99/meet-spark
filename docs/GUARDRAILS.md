@@ -44,7 +44,7 @@ One command runs the gate: `npm run verify` (check + lint + guard + all tests). 
 | **GR-10** | **Protected guardrail files** | An AI editing a guardrail to get a change through | `.claude/settings.json` asks before editing any file in §4. **Fingerprints**: `scripts/guardrails.lock.json` holds a SHA-256 per protected file; guard fails on any change until you approve and run `node scripts/guard.js --relock` (Claude Code is denied that command). CI requires the `guardrail-change` label when the lock changes |
 | **GR-11** | **Locked single gate** | Turning the gate off (e.g. `"test": "echo ok"`) | Guard checks the `check`/`lint`/`guard`/`test`/`verify`/`mutate`/`spec:check` scripts in `package.json` are exactly as recorded |
 | **GR-12** | **Mutation gate** | Guardrails with holes nobody noticed | `npm run mutate` (CI job `mutate`). Every bug fix adds a mutant that re-introduces the bug |
-| **GR-13** | **Spec traceability** | Approved requirements that were never tested | Guard: every requirement ID of an **Implemented** spec must appear in a test or check (Approved specs: warning) |
+| **GR-13** | **Spec traceability** | Approved requirements that were never tested | Guard: every requirement ID of an **Implemented** spec must appear in a **test name** or a gate script (Approved specs: warning). `mutants.json` and comments don't count |
 | **GR-14** | **Spec-first** | Code written before a spec was approved | `commit-msg` hook + CI: a commit touching `extension/` must name a requirement ID from a spec that was **already Approved in an earlier commit**. Claude Code hook: no edits to `extension/` while no spec is Approved |
 | **GR-15** | **Click recorder** | A new code path clicking Meet controls | `tests/helpers/meet.js` records every click on Meet's DOM in every browser test; `assertOnlySafeClicks()` allows only the People button and list group headers |
 | **GR-16** | **No obfuscated selectors** | Detection breaking when Meet renames internals | ESLint bans `jsname=`/`jscontroller=`/`jsaction=` selectors and generated class names in `q()`/`qa()` |
@@ -55,10 +55,26 @@ Test hygiene (GRH-060/062): no fixed sleeps in tests (use the fake clock `tick()
 
 ## 3. Feature coverage map (GR-8)
 
-Every shipped feature has at least one automated test. **A new feature is not done until it has a spec, a row here, test IDs in `scripts/guardrails.json` and a mutant.**
+Every behaviour has a requirement ID in a spec, a test whose **name** carries that ID (GR-13 checks this), and a mutant that proves the test catches its loss (GR-12). **A new feature is not done until it has all three.**
 
-| Feature | Behaviour locked by tests | Test IDs |
-|---|---|---|
+| Feature | Spec | Requirement IDs | Main test files |
+|---|---|---|---|
+| Launcher, panel, tabs, status, toasts, Trusted Types | `docs/specs/launcher-and-panel.md` | LAUNCH-001…009, KEYS-001 | features, ui-backfill, keys-diag, trusted-types |
+| Icebreakers | `docs/specs/icebreakers.md` | ICE-001…007 | features, ui-backfill |
+| This or that | `docs/specs/this-or-that.md` | WYR-001…003 | features, ui-backfill |
+| Meeting Bingo | `docs/specs/bingo.md` | BINGO-001…008 | features, ui-backfill |
+| Speakers: list and picker | `docs/specs/speakers.md` | SPK-001…016 | features, ui-backfill |
+| Copy to chat | `docs/specs/copy-to-chat.md` | COPY-001…006 | ui-backfill |
+| Auto-sync and manual sync | `docs/specs/sync.md`, `docs/specs/v2.5.1-fixes.md` | SYNC-101…108, SYNC-001…004 | sync-backfill, sync-roster, roster-sync, remove-clear-sync |
+| Roster and detection | `docs/specs/roster-and-detection.md`, `docs/specs/v2.5.1-fixes.md` | ROSTER-101…106, ROSTER-001…004, DETECT-001 | sync-backfill, sync-roster, markup-variants, features |
+| Safety (clicks into Meet) | `docs/specs/v2.5.1-fixes.md`, `docs/specs/guardrails-hardening.md` | SAFE-001…004, GRH-030…033 | safety (+ click recorder in every browser test) |
+| Diagnose | `docs/specs/diagnose.md`, `docs/specs/v2.5.1-fixes.md` | DIAG-101…104, DIAG-001 | ui-backfill, keys-diag, features, safety |
+| Content | (GR-7) | CONTENT-1 | content-policy |
+| Lint rules | `docs/specs/guardrails-hardening.md` | GRH-020…023 | lint-bypass |
+
+Real-call checks that mocks can't cover: `docs/QA_CHECKLIST.md`.
+
+---|---|---|
 | Launcher and panel | Mounts once · launcher/Close/Alt+S toggle · Alt+S ignored while typing, with Ctrl/Cmd/AltGr or key repeat | LAUNCH-1, LAUNCH-2, KEYS-001 |
 | Tabs | Each tab shows its view · last tab remembered | TABS-1 |
 | Icebreakers | 4 categories · no repeats until the deck is used up · counter · Ask | ICE-1, ICE-2, ICE-3 |

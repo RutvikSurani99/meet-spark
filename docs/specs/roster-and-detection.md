@@ -1,5 +1,5 @@
 # Roster and participant detection — Spec
-ID prefix: ROSTER (baseline rows numbered ROSTER-101+; ROSTER-001…004 live in `v2.5.1-fixes.md`) · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: ROSTER (baseline rows numbered ROSTER-101+; ROSTER-001…004 live in `v2.5.1-fixes.md`) · Status: **Implemented** (2026-10-04) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -31,3 +31,5 @@ Detection only reads the DOM. Names stay in this browser.
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
+- 2026-10-04 note: ROSTER-103 has a test but no mutant. Probe P40 (removing the `#meet-spark-host` check in `scanAvatars()`) can't change behaviour, because Spark's own UI lives in a closed-off Shadow DOM that `document.querySelectorAll` never reaches, so the check is redundant (an "equivalent mutant").
+- 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).

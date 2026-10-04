@@ -78,7 +78,7 @@ npm run package     # dist/meet-spark-<version>.zip
 - To fix selectors from a new report, use its `peopleLikeControls`, `dataAttrs`, `roles`, `regions` and `noTranslate` fields, then add a mock variant to `tests/markup-variants.test.js`.
 
 ## Guardrails (Layer 0.5, active)
-See `docs/GUARDRAILS.md` (GR-1…GR-16). `npm run verify`: check, lint (+ lint self-test), guard, 10 test files / 54 tests in about 25 s. `npm run mutate`: 29 mutants, all killed. Hooks: pre-commit, commit-msg (spec-first), pre-push (verify). Baseline tag: `v2.5.0-baseline`.
+See `docs/GUARDRAILS.md` (GR-1…GR-16). `npm run verify`: check, lint (+ lint self-test), guard, 12 test files / 94 tests. `npm run mutate`: 70 mutants, all killed. Hooks: pre-commit, commit-msg (spec-first), pre-push (verify). Baseline tag: `v2.5.0-baseline`.
 Browser tests can't download Chromium inside Cowork's sandbox on the Mac, so Claude runs them in the cloud workspace. On the Mac itself, `npm run setup` works normally.
 
 ## Current state (2026-10-04)
@@ -87,6 +87,9 @@ Browser tests can't download Chromium inside Cowork's sandbox on the Mac, so Cla
 - Still manual: GitHub repo, branch protection, `guardrail-change` label (GRH-002, `docs/GUARDRAILS.md` §6). Test v2.5.1 in a real call with more than 15 people and send a Diagnose report (it settles the SYNC-001 headcount − 1 threshold).
 - Needs review (flagged in `docs/specs/v2.5.1-fixes.md` v1.1/v1.2): SAFE-004 was added during implementation; `aria-pressed` is allowed on the People button; the passive watcher needs a known headcount before it treats an open panel as complete.
 
+## Specs
+Every feature has a spec in `docs/specs/` (see the coverage map in `docs/GUARDRAILS.md` §3): launcher-and-panel, icebreakers, this-or-that, bingo, speakers, sync, roster-and-detection, diagnose, copy-to-chat, plus the change specs guardrails-hardening, v2.5.1-fixes and test-coverage-backfill. All are Implemented, so the next change must start with a new or amended spec.
+
 ## Change log
 - 2026-10-01: Reference file created.
 - 2026-10-01: Engineering plan proposed in `docs/ENGINEERING_PLAN.md`. Found F1.
@@ -94,3 +97,4 @@ Browser tests can't download Chromium inside Cowork's sandbox on the Mac, so Cla
 - 2026-10-01: Layer 0 guardrails added (GR-1…GR-11).
 - 2026-10-04: Mutation audit: only 1 of 7 planted mistakes was caught. Specs `guardrails-hardening.md` and `v2.5.1-fixes.md` written and approved.
 - 2026-10-04: Layer 0.5 guardrails (GR-12…GR-16, mutation gate, fingerprints, spec-first enforcement) and v2.5.1 fixes (F1, F2, N1–N8) implemented, plus 3 fixes from an independent review. 29/29 mutants killed.
+- 2026-10-04: Backfill specs for every feature approved and implemented (test-only): 40 new tests, IDs in every test name, 70/70 mutants killed, `docs/QA_CHECKLIST.md`.

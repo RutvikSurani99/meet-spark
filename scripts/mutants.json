@@ -317,6 +317,487 @@
       "killedBy": [
         "sync-roster.test.js"
       ]
+    },
+    {
+      "id": "COV-P01",
+      "spec": "COPY-003",
+      "desc": "Icebreaker Copy drops the 'for <name>' part",
+      "file": "extension/content.js",
+      "find": "copy(to ? `Icebreaker for ${to}: ${iceCurrent}` : `Icebreaker: ${iceCurrent}`);",
+      "replace": "copy(to ? `Icebreaker: ${iceCurrent}${to.slice(0, 0)}` : `Icebreaker: ${iceCurrent}`);",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P02",
+      "spec": "COPY-003",
+      "desc": "Icebreaker Copy with no question: no 'Draw a question first' hint",
+      "file": "extension/content.js",
+      "find": "if (!iceCurrent) return toast(\"Draw a question first\");",
+      "replace": "if (!iceCurrent) return;",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P03",
+      "spec": "COPY-004",
+      "desc": "This-or-that Copy text loses the voting line",
+      "file": "extension/content.js",
+      "find": "\\nReact 👍 for A or ❤️ for B",
+      "replace": "",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P04",
+      "spec": "COPY-005",
+      "desc": "Bingo Invite copies nothing",
+      "file": "extension/content.js",
+      "find": "$(\"#bingoCopy\").addEventListener(\"click\", () => copy(",
+      "replace": "$(\"#bingoCopy\").addEventListener(\"click\", () => void (",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P05",
+      "spec": "COPY-002",
+      "desc": "Copy failure shows no message",
+      "file": "extension/content.js",
+      "find": "catch { toast(\"Copy failed — please copy manually\"); }",
+      "replace": "catch { }",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P06",
+      "spec": "BINGO-005",
+      "desc": "Bingo line: no confetti",
+      "file": "extension/content.js",
+      "find": "if (fresh) { celebrate(); toast(",
+      "replace": "if (fresh) { void celebrate; toast(",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P07",
+      "spec": "BINGO-005",
+      "desc": "Bingo line: no 'Bingo!' toast",
+      "file": "extension/content.js",
+      "find": "toast(\"Bingo! Call it out in the meeting\");",
+      "replace": "void 0;",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P08",
+      "spec": "SPK-016",
+      "desc": "Reset doesn't reset the picker text",
+      "file": "extension/content.js",
+      "find": "$(\"#pickedName\").textContent = \"Who's next?\";",
+      "replace": "",
+      "killedBy": [
+        "features.test.js"
+      ]
+    },
+    {
+      "id": "COV-P09",
+      "spec": "SPK-012",
+      "desc": "Fully random: '<n> in the draw' text gone",
+      "file": "extension/content.js",
+      "find": "`${active.length} in the draw`",
+      "replace": "\"\"",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P10",
+      "spec": "SPK-010",
+      "desc": "Pick mode not remembered",
+      "file": "extension/content.js",
+      "find": "store.set(\"mode\", m);",
+      "replace": "",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P11",
+      "spec": "SPK-011",
+      "desc": "New round: no 'Everyone has spoken' toast",
+      "file": "extension/content.js",
+      "find": "toast(\"Everyone has spoken — starting a new round\");",
+      "replace": "void 0;",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P12",
+      "spec": "LAUNCH-005",
+      "desc": "Speakers badge count wrong",
+      "file": "extension/content.js",
+      "find": "$(\"#navCount\").textContent = roster.all().length;",
+      "replace": "$(\"#navCount\").textContent = 0;",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P13",
+      "spec": "LAUNCH-006",
+      "desc": "Live badge says Live when auto-sync is OFF",
+      "file": "extension/content.js",
+      "find": "? \"Live\" : \"Manual\") : \"Not in call\";",
+      "replace": "? \"Live\" : \"Live\") : \"Not in call\";",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P14",
+      "spec": "LAUNCH-006",
+      "desc": "Live badge never says Not in call",
+      "file": "extension/content.js",
+      "find": ": \"Not in call\";",
+      "replace": ": \"Live\";",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P15",
+      "spec": "SPK-007",
+      "desc": "Remove keeps the person in the spoken list",
+      "file": "extension/content.js",
+      "find": "roster.remove(n); spoken.delete(n); saveSpoken();",
+      "replace": "roster.remove(n);",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P16",
+      "spec": "SPK-007",
+      "desc": "Remove: no 'Removed <name>' toast",
+      "file": "extension/content.js",
+      "find": "toast(`Removed ${n}`);",
+      "replace": "void 0;",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P17",
+      "spec": "SPK-008",
+      "desc": "Clear all keeps the spoken list",
+      "file": "extension/content.js",
+      "find": "roster.clear(); spoken.clear(); saveSpoken();",
+      "replace": "roster.clear();",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P18",
+      "spec": "SPK-002",
+      "desc": "Add name keeps '(You)'/junk suffixes",
+      "file": "extension/content.js",
+      "find": "const n = cleanName($(\"#addName\").value) || $(\"#addName\").value.trim();",
+      "replace": "const n = $(\"#addName\").value.trim();",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P19",
+      "spec": "SPK-003",
+      "desc": "Re-adding an excluded name keeps it excluded",
+      "file": "extension/content.js",
+      "find": "roster.manual.add(n); roster.excluded.delete(n);",
+      "replace": "roster.manual.add(n);",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P20",
+      "spec": "LAUNCH-008",
+      "desc": "Typing in Spark's name box leaks keys to Meet's shortcuts",
+      "file": "extension/content.js",
+      "find": "$(\"#addName\").addEventListener(\"keydown\", (e) => { e.stopPropagation(); if",
+      "replace": "$(\"#addName\").addEventListener(\"keydown\", (e) => { if",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P21",
+      "spec": "SPK-014",
+      "desc": "Pick button not disabled during the animation",
+      "file": "extension/content.js",
+      "find": "$(\"#pickBtn\").disabled = true;",
+      "replace": "",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P22",
+      "spec": "SYNC-106",
+      "desc": "Sync button not disabled during a sync",
+      "file": "extension/content.js",
+      "find": "    b.disabled = on;\n",
+      "replace": "",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P23",
+      "spec": "ICE-006",
+      "desc": "Draw clears 'Question for' line",
+      "file": "extension/content.js",
+      "find": "$(\"#iceTo\").textContent = \"\";\n",
+      "replace": "\n",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P24",
+      "spec": "LAUNCH-002",
+      "desc": "Mount-once guard removed (double inject = two launchers)",
+      "file": "extension/content.js",
+      "find": "  if (window.__meetSpark) return;\n",
+      "replace": "",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P25",
+      "spec": "SYNC-105",
+      "desc": "Manual full sync no longer clears dismissed names",
+      "file": "extension/content.js",
+      "find": "    if (!silent) roster.dismissed.clear();\n    syncing = true;",
+      "replace": "    syncing = true;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P26",
+      "spec": "SPK-005",
+      "desc": "Your own row loses the 'You' label",
+      "file": "extension/content.js",
+      "find": "me ? \"You\" : \"\"",
+      "replace": "me ? \"\" : \"\"",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P27",
+      "spec": "SPK-005",
+      "desc": "Manual names lose the 'Added manually' label",
+      "file": "extension/content.js",
+      "find": "\"Added manually\"",
+      "replace": "\"\"",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P28",
+      "spec": "ROSTER-101",
+      "desc": "cleanName lets Meet junk words through (mute, pin, Presentation)",
+      "file": "extension/content.js",
+      "find": "if (JUNK.test(n) || /_/.test(n) || /^\\d+$/.test(n)) return null;",
+      "replace": "if (JUNK.test(\"\") || /^\\d{9}$/.test(n)) return null;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P29",
+      "spec": "SYNC-103",
+      "desc": "Headcount re-sync loses its 8 s cooldown",
+      "file": "extension/content.js",
+      "find": "&& since > 8000;",
+      "replace": "&& since >= 0;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P30",
+      "spec": "SYNC-103",
+      "desc": "Re-sync every tick (lastSyncCount check removed)",
+      "file": "extension/content.js",
+      "find": "count !== roster.live.size && count !== roster.lastSyncCount &&",
+      "replace": "count !== roster.live.size &&",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P31",
+      "spec": "DIAG-101",
+      "desc": "Diagnose no longer copies the report",
+      "file": "extension/content.js",
+      "find": "console.log(\"[Meet Spark] diagnostics\", r); copy(r);",
+      "replace": "console.log(\"[Meet Spark] diagnostics\", r);",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P32",
+      "spec": "ICE-001",
+      "desc": "Category chip not highlighted",
+      "file": "extension/content.js",
+      "find": "c === cat ? \"active\" : \"\"",
+      "replace": "\"\"",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P33",
+      "spec": "BINGO-008",
+      "desc": "Bingo cells not HTML-escaped",
+      "file": "extension/content.js",
+      "find": "${i === 12 ? \"FREE\" : esc(t)}",
+      "replace": "${i === 12 ? \"FREE\" : t}",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P34",
+      "spec": "SPK-006",
+      "desc": "Excluded toggle no longer saved",
+      "file": "extension/content.js",
+      "find": "roster.excluded.has(n) ? roster.excluded.delete(n) : roster.excluded.add(n);\n          roster.save();",
+      "replace": "roster.excluded.has(n) ? roster.excluded.delete(n) : roster.excluded.add(n);\n          void 0;",
+      "killedBy": [
+        "features.test.js"
+      ]
+    },
+    {
+      "id": "COV-P35",
+      "spec": "SPK-005",
+      "desc": "Avatar initials wrong",
+      "file": "extension/content.js",
+      "find": "const initials = (n) => n.split(/\\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join(\"\").toUpperCase();",
+      "replace": "const initials = (n) => n.slice(0, 1);",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P36",
+      "spec": "SYNC-108",
+      "desc": "Screen sync with no names: no help toast",
+      "file": "extension/content.js",
+      "find": "toast(\"No names found. Open Meet's People panel, then tap sync.\");",
+      "replace": "void 0;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P37",
+      "spec": "SYNC-108",
+      "desc": "Sync toast missing",
+      "file": "extension/content.js",
+      "find": "toast(complete ? `Synced ${panelSize} participant${panelSize === 1 ? \"\" : \"s\"}`\n          : `Synced ${panelSize} so far. Scroll the People panel to the bottom or tap sync again.`);",
+      "replace": "void 0;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P38",
+      "spec": "SYNC-108",
+      "desc": "Paused-sync toast missing",
+      "file": "extension/content.js",
+      "find": "toast(\"Sync paused: Meet's side panel changed. Tap sync again when the People panel is closed.\");",
+      "replace": "void 0;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P39",
+      "spec": "SYNC-105",
+      "desc": "Tapping sync no longer un-pauses auto-sync",
+      "file": "extension/content.js",
+      "find": "$(\"#syncBtn\").addEventListener(\"click\", () => { syncPaused = false; fullSync(); });",
+      "replace": "$(\"#syncBtn\").addEventListener(\"click\", () => { fullSync(); });",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P41",
+      "spec": "LAUNCH-007",
+      "desc": "Toast never hides",
+      "file": "extension/content.js",
+      "find": "clearTimeout(s._t); s._t = setTimeout(() => s.classList.remove(\"show\"), 2200);",
+      "replace": "clearTimeout(s._t);",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
+    },
+    {
+      "id": "COV-P42",
+      "spec": "SPK-015",
+      "desc": "Pick with nobody doesn't switch to the Speakers tab",
+      "file": "extension/content.js",
+      "find": "toast(\"No participants yet — sync or add names\"); showView(\"people\"); return null;",
+      "replace": "toast(\"No participants yet — sync or add names\"); return null;",
+      "killedBy": [
+        "features.test.js",
+        "ui-backfill.test.js"
+      ]
     }
   ]
 }

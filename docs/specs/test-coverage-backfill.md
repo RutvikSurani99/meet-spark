@@ -1,5 +1,5 @@
 # Test coverage backfill — Spec
-ID prefix: COV · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: COV · Status: **Implemented** (2026-10-04) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Covers the work for: `launcher-and-panel.md`, `icebreakers.md`, `this-or-that.md`, `bingo.md`, `speakers.md`, `sync.md`, `roster-and-detection.md`, `diagnose.md`, `copy-to-chat.md` (all Draft, approve together).
 
 ## Problem / goal
@@ -23,7 +23,7 @@ The 2026-10-04 coverage audit found that:
 | COV-004 | MUST add a clipboard stub to `tests/helpers/meet.js` that records `navigator.clipboard.writeText` calls and can be told to reject, so copy behaviour can be tested | COPY-001…006 tests use it | e2e |
 | COV-005 | MUST keep the full `npm test` run under 60 s on CI (GRH-063), using the fake clock for every timing requirement (toast 2.2 s, re-sync 8 s, first sync 4 s) | CI prints the duration under 60 s | CI |
 | COV-006 | MUST update the coverage map in `docs/GUARDRAILS.md` §3 so it lists requirement IDs per feature, and list the nine specs in `docs/PROJECT_NOTES.md` | Docs reviewed | review |
-| COV-007 | SHOULD add a short manual checklist for a real Meet call (`docs/QA_CHECKLIST.md`, planned): sync in a call with more than 15 people, open Chat during a sync, Alt+S in chat, Diagnose, copy to chat. Mock pages can't prove Meet's real DOM | Checklist exists and is linked from `docs/CLAUDE.md` "Releasing" | manual |
+| COV-007 | SHOULD add a short manual checklist for a real Meet call (`docs/QA_CHECKLIST.md`): sync in a call with more than 15 people, open Chat during a sync, Alt+S in chat, Diagnose, copy to chat. Mock pages can't prove Meet's real DOM | Checklist exists and is linked from `docs/CLAUDE.md` "Releasing" | manual |
 
 ## Edge cases
 - A requirement covered by an existing test: the test's name gains the ID; its assertions are not loosened (GR-8).
@@ -46,3 +46,5 @@ Test-only work, plus a guard change. `extension/` doesn't change, so no product 
 ## Changelog
 - 2026-10-04 v1: Draft, from the coverage audit.
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
+- 2026-10-04 implementation notes: COV-002 also counts the gate scripts that implement checks (`scripts/mutate.js`, `scripts/spec-check.js`, `tests/run.js`, `tests/helpers/meet.js`, `.githooks/*`); `mutants.json` and test-file comments no longer count. Tightening it exposed 7 weakly traced IDs (GRH-033, GRH-040…042, GRH-044, SAFE-004, DETECT-001), now traced through test names. COV-003: 41 new mutants (P01–P42 except P40, which is an equivalent mutant; P08, P12, P34 included as well), so the gate has **70**, all killed. `sync.md` SYNC-102 text was corrected (v1.1).
+- 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).

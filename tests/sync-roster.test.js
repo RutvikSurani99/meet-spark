@@ -140,7 +140,7 @@ test("ROSTER-002b /_meet/<code> URLs are meetings too and save under the meeting
   await close();
 });
 
-test("ROSTER-004 stored data of the wrong type doesn't break startup", async () => {
+test("ROSTER-004 stored data of the wrong type doesn't break startup [LAUNCH-004, BINGO-006]", async () => {
   const { page, errors, inject, close } = await openMeet({ browser, clock: true, inject: false, url: MEET_URL });
   await page.evaluate(() => {
     localStorage.setItem("meetSpark:manual:abc-defg-hij", "42");

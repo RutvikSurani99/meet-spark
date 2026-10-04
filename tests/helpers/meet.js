@@ -33,6 +33,15 @@ function clickRecorder() {
   }, true);
 }
 
+// COV-004: clipboard stub. Records every navigator.clipboard.writeText() call in window.__clipboard;
+// set window.__clipboardFail = true to make the next writes reject (like a denied permission).
+function clipboardStub() {
+  window.__clipboard = [];
+  const writeText = async (t) => { if (window.__clipboardFail) throw new Error("NotAllowedError"); window.__clipboard.push(String(t)); };
+  try { Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } }); } catch (e) { /* ignore */ }
+}
+const clipboard = (page) => page.evaluate(() => window.__clipboard || []);
+
 // The only Meet elements Spark may ever click (GR-2): the People button, and a group header
 // ("Contributors" etc.) inside the participants list. Mirrors safeCandidate()/safeClick() in content.js.
 const PEOPLE_LABEL = /^(people|show everyone|everyone|participants|show participants|view participants)\b/i;
@@ -53,7 +62,8 @@ async function assertOnlySafeClicks(page, note = "") {
   assert.deepStrictEqual(bad, [], `GR-2: Spark clicked Meet controls it must never click ${note}`);
 }
 
-async function openMeet({ body = DEFAULT_BODY, csp, browser, url = MEET_URL, clock = false, inject = true } = {}) {
+// init: extra functions to run in the page before anything else (e.g. to block localStorage).
+async function openMeet({ body = DEFAULT_BODY, csp, browser, url = MEET_URL, clock = false, inject = true, init = [] } = {}) {
   const b = browser || (await chromium.launch());
   const context = await b.newContext({ viewport: { width: 1280, height: 820 } });
   const page = await context.newPage();
@@ -64,6 +74,8 @@ async function openMeet({ body = DEFAULT_BODY, csp, browser, url = MEET_URL, clo
   const TT_FALLBACK = /requires 'TrustedHTML' assignment|Refused to create a TrustedTypePolicy named 'meet-spark-/;
   page.on("console", (m) => { if (m.type() === "error" && !TT_FALLBACK.test(m.text())) errors.push(m.text()); });
   await page.addInitScript(clickRecorder);
+  await page.addInitScript(clipboardStub);
+  for (const fn of init) await page.addInitScript(fn);
   if (clock) await page.clock.install();
   await page.route("https://meet.google.com/**", (r) =>
     r.fulfill({ contentType: "text/html", headers: csp ? { "content-security-policy": csp } : {}, body }));
@@ -88,6 +100,8 @@ const ui = (page, fn, arg) =>
 const click = (page, sel) => ui(page, (r, s) => { const el = r.querySelector(s); if (!el) throw new Error("missing " + s); el.click(); }, sel);
 const text = (page, sel) => ui(page, (r, s) => r.querySelector(s)?.textContent ?? null, sel);
 const storage = (page, key) => page.evaluate((k) => JSON.parse(localStorage.getItem("meetSpark:" + k)), key);
+const snack = (page) => ui(page, (r) => ({ text: r.querySelector("#snack").textContent, shown: r.querySelector("#snack").classList.contains("show") }));
+const activeView = (page) => ui(page, (r) => [...r.querySelectorAll(".view.active")].map((e) => e.dataset.v));
 const names = (page) => ui(page, (r) => [...r.querySelectorAll("#people .person .nm")].map((e) => e.textContent));
 const addName = (page, n) => ui(page, (r, v) => { r.querySelector("#addName").value = v; r.querySelector("#addBtn").click(); }, n);
 async function diagnose(page) {
@@ -118,6 +132,6 @@ function suite(name) {
 }
 
 module.exports = {
-  openMeet, tick, ui, click, text, storage, names, addName, diagnose, suite,
+  openMeet, tick, ui, click, text, storage, names, addName, diagnose, suite, clipboard, snack, activeView,
   clicks, assertOnlySafeClicks, isAllowedClick, MEET_URL, EXT,
 };

@@ -60,4 +60,4 @@ In the Speakers tab, **Diagnose** copies a JSON report of Meet's structure (name
 Known state as of v2.5 (from a real report): the user's Meet had no `data-participant-id` tiles, no `role="list"`, and no button labelled "People". Detection there relies on `scanAvatars()` and the user opening the People panel and tapping sync.
 
 ## Releasing
-Bump `version` in both `extension/manifest.json` and `package.json` (this is a code change: name the release spec IDs in the commit), move the `[Unreleased]` notes in `docs/CHANGELOG.md` under the new version, run `npm run verify` and `npm run mutate`, then `npm run package`.
+Bump `version` in both `extension/manifest.json` and `package.json` (this is a code change: name the release spec IDs in the commit), move the `[Unreleased]` notes in `docs/CHANGELOG.md` under the new version, run `npm run verify` and `npm run mutate`, go through `docs/QA_CHECKLIST.md` in a real Meet call, then `npm run package`.

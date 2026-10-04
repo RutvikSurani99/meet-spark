@@ -12,7 +12,7 @@ const CSPS = {
 };
 
 for (const [id, csp] of Object.entries(CSPS)) {
-  test(`${id} renders and works under CSP: ${csp}`, async () => {
+  test(`${id} renders and works under CSP: ${csp} [LAUNCH-009]`, async () => {
     const { page, errors, close } = await openMeet({ browser, csp });
     const res = await ui(page, (r) => {
       r.querySelector("#launcher").click();

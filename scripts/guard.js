@@ -174,11 +174,16 @@ for (const f of walk("docs", (n) => n.endsWith(".md"))) {
 
 // ---------- GR-13 / GRH-072: spec traceability ----------
 const EXEMPT = /\b(manual|process|review)\b/i;
-const corpusFiles = [
-  ...walk("tests", (n) => n.endsWith(".js")), ...walk("scripts", (n) => /\.(js|json)$/.test(n) && n !== "guardrails.lock.json"),
-  ...walk(".githooks"), ...walk(".github"), "eslint.config.js",
-].filter(exists);
-const corpus = corpusFiles.map(read).join("\n");
+// COV-001 / COV-002: an ID counts as tested only if it appears in a TEST NAME (test("…") / "✓ …" lines in tests/*.test.js)
+// or in one of the gate scripts that implement guard/lint/CI-level checks. scripts/mutants.json, guardrails.json
+// and ordinary code comments in test files do not count.
+const testNames = walk("tests", (n) => n.endsWith(".test.js")).flatMap((f) => {
+  const t = read(f);
+  return [...t.matchAll(/\btest\(\s*(["'`])([\s\S]*?)\1\s*,/g), ...t.matchAll(/✓["'`}\s]*([A-Z][^"'`\n]+)/g)].map((m) => m[2] || m[1]);
+});
+const gateFiles = ["scripts/guard.js", "scripts/mutate.js", "scripts/spec-check.js", "tests/run.js", "tests/helpers/meet.js",
+  "eslint.config.js", ".github/workflows/ci.yml", ...walk(".githooks")].filter(exists);
+const corpus = [...testNames, ...gateFiles.map(read)].join("\n");
 const untested = [];
 const pending = [];
 for (const f of walk("docs/specs", (n) => n.endsWith(".md") && !n.startsWith("_"))) {

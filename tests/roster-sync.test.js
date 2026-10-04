@@ -20,7 +20,7 @@ const body = `<body style="margin:0;background:#202124;height:100vh;font-family:
     s.innerHTML = '<div role="list" aria-label="Participants">' + PEOPLE.map(n => '<div role="listitem" aria-label="' + n + '">' + n + '</div>').join('') + '</div>'; };
  </script></body>`;
 
-test("SYNC-JOIN full sync reads the People panel, closes it again and picks up joiners", async () => {
+test("SYNC-JOIN full sync reads the People panel, closes it again and picks up joiners [SYNC-102, ROSTER-102]", async () => {
   const { page, errors, close } = await openMeet({ browser, clock: true, body });
   await tick(page, 8000); // first automatic sync
   assert.deepStrictEqual(await names(page), ["Asha Rao", "Karthik M", "Priya Nair", "Rutvik Bharat", "Vikram Singh"]);

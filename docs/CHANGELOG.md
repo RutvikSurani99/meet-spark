@@ -5,6 +5,12 @@ Every entry names the spec requirement IDs it implements (see `docs/specs/`).
 
 ## [Unreleased]
 
+### Tests and specs (no product change)
+- Specs for every existing feature: launcher-and-panel, icebreakers, this-or-that, bingo, speakers, sync, roster-and-detection, diagnose, copy-to-chat (67 requirements), plus test-coverage-backfill.
+- 40 new tests (`tests/ui-backfill.test.js`, `tests/sync-backfill.test.js`), including SYNC-103, which stops the People panel from flashing in live calls; existing test names now carry their requirement IDs.
+- Mutation gate grows from 29 to 70 mutants, all killed. Traceability counts test names only (COV-002). Clipboard stub for copy tests (COV-004).
+- `docs/QA_CHECKLIST.md` for real-call checks (COV-007).
+
 ## [2.5.1] — 2026-10-04
 Specs: `docs/specs/v2.5.1-fixes.md`, `docs/specs/guardrails-hardening.md` (both Implemented).
 

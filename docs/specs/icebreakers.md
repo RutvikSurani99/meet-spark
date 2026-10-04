@@ -1,5 +1,5 @@
 # Icebreakers — Spec
-ID prefix: ICE · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: ICE · Status: **Implemented** (2026-10-04) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`. Copy text: `copy-to-chat.md`.
 
 ## Problem / goal
@@ -36,3 +36,4 @@ None.
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
+- 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).

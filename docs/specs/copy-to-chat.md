@@ -1,5 +1,5 @@
 # Copy to chat — Spec
-ID prefix: COPY · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: COPY · Status: **Implemented** (2026-10-04) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -21,3 +21,4 @@ Nothing is pasted or sent automatically; the host decides what to paste.
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
+- 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).

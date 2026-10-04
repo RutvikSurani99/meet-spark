@@ -21,7 +21,7 @@ const CSP = "require-trusted-types-for 'script'; trusted-types goog#html";
 const CASES = [["VARIANT-A-aria", "A", "aria"], ["VARIANT-A-text", "A", "text"], ["VARIANT-B-aria", "B", "aria"], ["VARIANT-B-text", "B", "text"]];
 for (const [id, k, style] of CASES) {
   const btn = BUTTONS[k], rowJs = ROWS[style];
-  test(`${id} button ${k} with ${style} rows`, async () => {
+  test(`${id} button ${k} with ${style} rows [ROSTER-102]`, async () => {
     const body = `<body style="background:#202124;height:100vh">
       <div data-participant-id="x1"><div class="notranslate">Rutvik Bharat</div></div>
       <div style="position:fixed;bottom:10px;right:10px">${btn}<button aria-label="Leave call"><i>call_end</i></button></div>

@@ -12,7 +12,7 @@ const body = `<body style="background:#202124"><button aria-label="Leave call">c
   <section id="pp" style="background:#fff;width:300px"><h2>People</h2><div>In the meeting</div>
   ${["Rutvik Bharat (You)", "Asha Rao", "Vikram Singh", "Priya Nair"].map(row).join("")}</section></body>`;
 
-test("RCS-1 removed names stay removed on passive scans; Clear all empties; a manual sync restores", async () => {
+test("RCS-1 removed names stay removed on passive scans; Clear all empties; a manual sync restores [SYNC-101, SYNC-107, ROSTER-102, ROSTER-105, SPK-008]", async () => {
   const { page, errors, close } = await openMeet({ browser, clock: true, body });
   await tick(page, 3000);
   assert.deepStrictEqual(await names(page), ["Asha Rao", "Priya Nair", "Rutvik Bharat", "Vikram Singh"], "passive scan");

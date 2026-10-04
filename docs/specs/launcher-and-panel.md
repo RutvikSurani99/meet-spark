@@ -1,5 +1,5 @@
 # Launcher and panel — Spec
-ID prefix: LAUNCH · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: LAUNCH · Status: **Implemented** (2026-10-04) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -40,3 +40,4 @@ None of these behaviours touch Meet's DOM except reading whether a call is activ
 ## Changelog
 - 2026-10-04 v1: Draft (backfill from v2.5.1 behaviour and the probe audit).
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
+- 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).

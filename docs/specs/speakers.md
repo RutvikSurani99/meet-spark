@@ -1,5 +1,5 @@
 # Speakers: participant list and speaker picker — Spec
-ID prefix: SPK · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: SPK · Status: **Implemented** (2026-10-04) · Approved 2026-10-04 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`. How names get into the roster automatically: `sync.md` and `roster-and-detection.md`.
 
 ## Problem / goal
@@ -47,3 +47,4 @@ Names are stored only in this browser (`localStorage`, `meetSpark:` keys). Nothi
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
+- 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).
