@@ -1,5 +1,5 @@
 # Launcher and panel — Spec
-ID prefix: LAUNCH · Status: **Draft** · Version: 1 · Owner: Rutvik Bharat
+ID prefix: LAUNCH · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -34,8 +34,9 @@ Launcher title "Meet Spark (Alt+S)". Panel `role="dialog"`, `aria-label="Meet Sp
 ## Safety / privacy notes
 None of these behaviours touch Meet's DOM except reading whether a call is active.
 
-## Open questions
-1. Should a toast also be announced to screen readers now (`aria-live`)? Currently deferred as A11Y-3.
+## Decisions (were open questions)
+1. Screen-reader announcement of toasts stays deferred (A11Y-3, v2.6).
 
 ## Changelog
 - 2026-10-04 v1: Draft (backfill from v2.5.1 behaviour and the probe audit).
+- 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).

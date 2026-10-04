@@ -1,5 +1,5 @@
 # Speakers: participant list and speaker picker — Spec
-ID prefix: SPK · Status: **Draft** · Version: 1 · Owner: Rutvik Bharat
+ID prefix: SPK · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`. How names get into the roster automatically: `sync.md` and `roster-and-detection.md`.
 
 ## Problem / goal
@@ -40,9 +40,10 @@ Let the host see who's in the call, adjust the list, and fairly pick the next sp
 ## Safety / privacy notes
 Names are stored only in this browser (`localStorage`, `meetSpark:` keys). Nothing is sent anywhere (GR-5).
 
-## Open questions
-1. Should **Clear all** also clear manually added names? It does today; some hosts may expect only detected names to go.
-2. Fully random can pick the same person twice in a row. Keep, or avoid immediate repeats (part of DECK-1/PICK-1 in v2.6)?
+## Decisions (were open questions)
+1. **Clear all** keeps clearing manually added names too (current behaviour).
+2. **Fully random** may pick the same person twice in a row (current behaviour).
 
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
+- 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).

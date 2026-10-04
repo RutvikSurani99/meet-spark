@@ -1,5 +1,5 @@
 # Auto-sync and manual sync — Spec
-ID prefix: SYNC (baseline rows numbered SYNC-101+; SYNC-001…004 live in `v2.5.1-fixes.md`) · Status: **Draft** · Version: 1 · Owner: Rutvik Bharat
+ID prefix: SYNC (baseline rows numbered SYNC-101+; SYNC-001…004 live in `v2.5.1-fixes.md`) · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -28,8 +28,9 @@ Keep the participant list current without the host doing anything, while touchin
 ## Safety / privacy notes
 Every sync click goes through `safeClick()`. SYNC-103 limits how often Spark opens the People panel in someone else's live call.
 
-## Open questions
-1. Is 8 s the right minimum gap between automatic syncs in a large call where people join every few seconds? Proposal: keep 8 s; revisit with a real-call report.
+## Decisions (were open questions)
+1. The minimum gap between automatic syncs stays **8 s** (revisit with a real-call report).
 
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
+- 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).

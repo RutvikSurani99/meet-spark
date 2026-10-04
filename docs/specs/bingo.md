@@ -1,5 +1,5 @@
 # Meeting Bingo — Spec
-ID prefix: BINGO · Status: **Draft** · Version: 1 · Owner: Rutvik Bharat
+ID prefix: BINGO · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`. Invite text: `copy-to-chat.md`.
 
 ## Problem / goal
@@ -22,3 +22,4 @@ Shared/multiplayer cards; keyboard play (A11Y-1, v2.6).
 
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
+- 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).

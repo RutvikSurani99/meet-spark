@@ -1,5 +1,5 @@
 # Diagnose report — Spec
-ID prefix: DIAG (baseline rows numbered DIAG-101+; DIAG-001 lives in `v2.5.1-fixes.md`) · Status: **Draft** · Version: 1 · Owner: Rutvik Bharat
+ID prefix: DIAG (baseline rows numbered DIAG-101+; DIAG-001 lives in `v2.5.1-fixes.md`) · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -15,3 +15,4 @@ When detection misses people in a real call, the host can hand over a structural
 
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
+- 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).

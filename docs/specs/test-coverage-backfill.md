@@ -1,5 +1,5 @@
 # Test coverage backfill — Spec
-ID prefix: COV · Status: **Draft** · Version: 1 · Owner: Rutvik Bharat
+ID prefix: COV · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
 Covers the work for: `launcher-and-panel.md`, `icebreakers.md`, `this-or-that.md`, `bingo.md`, `speakers.md`, `sync.md`, `roster-and-detection.md`, `diagnose.md`, `copy-to-chat.md` (all Draft, approve together).
 
 ## Problem / goal
@@ -39,9 +39,10 @@ Test-only work, plus a guard change. `extension/` doesn't change, so no product 
 4. COV-003 mutants; `npm run mutate` must report 68/68.
 5. COV-006/007 docs; mark all ten specs Implemented.
 
-## Open questions
-1. Approve all ten specs together, or feature by feature? *Proposal: together; it's one test-only change.*
-2. The open questions in the feature specs (Clear all removing manual names, random repeats, the 8 s gap, same-name merging, aria-live) are kept as **current behaviour** unless you decide otherwise.
+## Decisions (were open questions)
+1. All ten specs approved together.
+2. Current behaviour kept for Clear all, random repeats, the 8 s gap, same-name merging and aria-live.
 
 ## Changelog
 - 2026-10-04 v1: Draft, from the coverage audit.
+- 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).

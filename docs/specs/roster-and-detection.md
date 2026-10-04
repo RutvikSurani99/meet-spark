@@ -1,5 +1,5 @@
 # Roster and participant detection — Spec
-ID prefix: ROSTER (baseline rows numbered ROSTER-101+; ROSTER-001…004 live in `v2.5.1-fixes.md`) · Status: **Draft** · Version: 1 · Owner: Rutvik Bharat
+ID prefix: ROSTER (baseline rows numbered ROSTER-101+; ROSTER-001…004 live in `v2.5.1-fixes.md`) · Status: **Approved** (2026-10-04, Rutvik) · Version: 1 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -25,8 +25,9 @@ Selecting by obfuscated attributes (forbidden, GR-16).
 ## Safety / privacy notes
 Detection only reads the DOM. Names stay in this browser.
 
-## Open questions
-1. Same-name participants: acceptable to merge? (Today: yes.)
+## Decisions (were open questions)
+1. Participants with the same display name are shown once (current behaviour).
 
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
+- 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
