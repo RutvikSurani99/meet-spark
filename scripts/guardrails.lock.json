@@ -4,7 +4,7 @@
   "scripts/guardrails.json": "6752e3dfea0179f6732f948c384cd3952bbcc8f5428434cf14ee9c8d81b75791",
   "scripts/mutate.js": "77081c0a2fce2bf43d53d4627e7744cae9075a1d1a41ca754c607138fecb259b",
   "scripts/mutants.json": "eca46e519777ed8ef979727aa03cbd73cd078233fff899694be14f4e7dd31dde",
-  "scripts/spec-check.js": "a1dc00b056d9ec0a21338ec6c3cce2160d0d677e1984fb000bef06382394099a",
+  "scripts/spec-check.js": "6738f9d2aa37700537d9380ea8df95686fbffb5de771722cc706eea1ed286204",
   "tests/run.js": "ea2641d51f840364edfbd93555c3b089280f6e3691a8c45fade0766fcea90c44",
   "tests/helpers/meet.js": "976a48a2ed10785237b77990d8244ceede401cc4aa27f15c8098051549b36295",
   "tests/helpers/content.js": "de857b70cf1e552c12ced2441fa732a9887188fb13941f0f9f4601746e0349dd",

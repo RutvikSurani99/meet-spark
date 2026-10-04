@@ -74,7 +74,10 @@ if (mode === "--range") {
   const [base, head] = args;
   const revs = tryGit("rev-list", "--no-merges", "--reverse", `${base}..${head}`).split("\n").filter(Boolean);
   const errs = [];
+  let skipped = 0;
   for (const rev of revs) {
+    // The rule applies from the commit after scripts/spec-check.js first existed; older history is exempt.
+    if (!tryGit("rev-parse", "--verify", "-q", `${rev}^:scripts/spec-check.js`)) { skipped++; continue; }
     const files = git("diff-tree", "--no-commit-id", "--name-only", "-r", rev).split("\n").filter(Boolean);
     const message = git("log", "-1", "--format=%B", rev);
     const parent = tryGit("rev-parse", "--verify", `${rev}^`) || null;
@@ -82,7 +85,7 @@ if (mode === "--range") {
     if (err) errs.push(err);
   }
   if (errs.length) { console.error(errs.join("\n\n")); process.exit(1); }
-  console.log(`✓ GR-14 spec-first: ${revs.length} commit(s) checked`);
+  console.log(`✓ GR-14 spec-first: ${revs.length - skipped} commit(s) checked${skipped ? `, ${skipped} from before the rule existed skipped` : ""}`);
   process.exit(0);
 }
 
