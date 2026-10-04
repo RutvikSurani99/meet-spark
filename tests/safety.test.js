@@ -103,6 +103,20 @@ test("SAFE-003 if Chat replaces the People panel during a sync, Spark doesn't cl
   await close();
 });
 
+test("SAFE-003 a Chat panel whose text mentions people/participants is not mistaken for the People list", async () => {
+  const people = peopleNames(4);
+  const chat = `<section id="chatp"><h2>In-call messages</h2><div>Messages can only be seen by people in the call. Let participants send messages</div>
+    <div role="list"><div role="listitem">Hi all</div><div role="listitem">Good morning</div></div></section>`;
+  const hijack = DURING_SYNC(`document.getElementById("side").innerHTML = ${JSON.stringify(chat)};`);
+  const { page, close } = await openMeet({ browser, clock: true, body: panelPage({ people, extraBody: hijack }) });
+  await tick(page, 12000);
+  assert.ok(await page.evaluate(() => !!document.getElementById("chatp")), "Spark took Chat for the People list and closed it");
+  assert.strictEqual((await clicks(page)).filter((c) => c.label === "People").length, 1, "People button clicked again after Chat took over");
+  const roster = await names(page);
+  assert.ok(!roster.includes("Hi all") && !roster.includes("Good morning"), `chat lines were added as people: ${roster}`);
+  await close();
+});
+
 test("SAFE-003 if Meet re-renders the People button during a sync, Spark closes the panel with the new button", async () => {
   const people = peopleNames(4);
   const rerender = DURING_SYNC(`const b = document.getElementById("pb"); b.replaceWith(b.cloneNode(true));`);

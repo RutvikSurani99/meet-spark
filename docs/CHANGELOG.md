@@ -24,9 +24,10 @@ Specs: `docs/specs/v2.5.1-fixes.md`, `docs/specs/guardrails-hardening.md` (both 
 - Alt+S no longer fires while typing in Meet's chat or with Ctrl/Cmd/AltGr, and holding the keys doesn't flicker the panel (KEYS-001).
 - Diagnose redacts names inside control labels and the meeting code (DIAG-001).
 - `leaveButton()` no longer uses Meet's obfuscated `jsname` (DETECT-001).
+- Found by an independent review before release: a Chat panel whose text mentions "people" is no longer taken for the People list (SYNC-004, SAFE-003); lists that scroll themselves are read to the end (SYNC-002); `/_meet/<code>` URLs count as meetings (ROSTER-002).
 
 ### Guardrails
-- Mutation gate (`npm run mutate`, 26 mutants), protected-file fingerprints, locked gate scripts, test inventory, spec traceability, closed lint loopholes, click recorder + trap page + People-button table, fake-clock tests (the suite went from about 90 s to about 25 s).
+- Mutation gate (`npm run mutate`, 29 mutants), protected-file fingerprints, locked gate scripts, test inventory, spec traceability, closed lint loopholes, click recorder + trap page + People-button table, fake-clock tests (the suite went from about 90 s to about 25 s, 54 tests).
 - Spec-first workflow enforced: commit-msg hook, CI check, Claude Code hook, and the `/spec` and `/implement` commands (GR-14).
 
 ## [2.5.0] — 2026-10-01

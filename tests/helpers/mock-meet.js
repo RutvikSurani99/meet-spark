@@ -18,8 +18,9 @@ function peopleNames(n) {
 //   delegated:  handle the People button with a document-level listener (like Meet's jsaction), so a
 //               click on a detached button does nothing
 //   openDelay:  ms before the list renders after the People button is pressed (Meet animates the panel in)
-function panelPage({ people, virtual = false, count = true, group = false, hosts = 1, delegated = false, openDelay = 0, extraBody = "" }) {
-  const cfg = { people, virtual, group, hosts, delegated, openDelay };
+//   selfScroll: with virtual, the role=list element itself is the scroll container (no wrapper)
+function panelPage({ people, virtual = false, count = true, group = false, hosts = 1, delegated = false, openDelay = 0, selfScroll = false, extraBody = "" }) {
+  const cfg = { people, virtual, group, hosts, delegated, openDelay, selfScroll };
   return `<body style="margin:0;background:#202124;height:100vh;font-family:Arial">
   <div data-participant-id="me"><span class="notranslate">${people[0]}</span><div data-self-name="${people[0]}"></div></div>
   <button aria-label="Leave call">call_end</button>
@@ -48,9 +49,10 @@ function panelPage({ people, virtual = false, count = true, group = false, hosts
       const all = rows();
       if (!CFG.virtual) { list.innerHTML = all.map((r) => html(r)).join(""); }
       else {
-        list.style.height = all.length * H + "px";
+        const inner = CFG.selfScroll ? document.getElementById("inner") : list;
+        inner.style.height = all.length * H + "px";
         const sc = document.getElementById("sc"), first = Math.floor(sc.scrollTop / H), last = Math.min(all.length, first + Math.ceil(VIEW / H) + 1);
-        list.innerHTML = all.slice(first, last).map((r, i) => html(r, (first + i) * H)).join("");
+        inner.innerHTML = all.slice(first, last).map((r, i) => html(r, (first + i) * H)).join("");
       }
       const g = document.getElementById("grp"); if (g) g.onclick = () => { expanded = !expanded; render(); };
     }
@@ -58,7 +60,9 @@ function panelPage({ people, virtual = false, count = true, group = false, hosts
     function open() {
       const side = document.getElementById("side");
       if (CFG.virtual) {
-        side.innerHTML = '<div id="sc" style="height:' + VIEW + 'px;overflow-y:auto"><div role="list" aria-label="Participants" style="position:relative"></div></div>';
+        side.innerHTML = CFG.selfScroll
+          ? '<div id="sc" role="list" aria-label="Participants" style="height:' + VIEW + 'px;overflow-y:auto"><div id="inner" style="position:relative"></div></div>'
+          : '<div id="sc" style="height:' + VIEW + 'px;overflow-y:auto"><div role="list" aria-label="Participants" style="position:relative"></div></div>';
         const sc = document.getElementById("sc");
         const d = Object.getOwnPropertyDescriptor(Element.prototype, "scrollTop");
         Object.defineProperty(sc, "scrollTop", { get() { return d.get.call(this); }, set(v) { d.set.call(this, v); render(); } });

@@ -233,7 +233,7 @@
     return a;
   };
   // ROSTER-002: a meeting code (abc-defg-hij) or a /lookup/ path; null on the home screen and other pages.
-  const MEETING_PATH = /^\/(?:([a-z]{3}-[a-z]{4}-[a-z]{3})|lookup\/([\w-]+))(?:[/?#]|$)/i;
+  const MEETING_PATH = /^\/(?:_meet\/)?(?:([a-z]{3}-[a-z]{4}-[a-z]{3})|lookup\/([\w-]+))(?:[/?#]|$)/i;
   const meetingId = () => { const m = location.pathname.match(MEETING_PATH); return m ? (m[1] || "lookup-" + m[2]).toLowerCase() : null; };
   // ROSTER-004: stored data is validated before use; anything of the wrong shape is ignored.
   const validNames = (v) => (Array.isArray(v) ? v.filter((n) => typeof n === "string" && n.trim() && n.length <= 80) : []);
@@ -359,9 +359,12 @@
     lists.forEach((l) => {
       const rows = qa('[role="listitem"]', l);
       const named = rows.filter((r) => nameFrom(r)).length;
-      const inPanel = /people|participants|in the meeting|in call|contributors/i.test(
-        (l.closest("aside, [role=complementary], [role=dialog], [role=region]") || l.parentElement || l).getAttribute?.("aria-label") ||
-        (l.closest("aside, [role=complementary], [role=dialog], [role=region]") || {}).innerText?.slice(0, 200) || "");
+      // SYNC-004: judge the panel by its aria-label or heading only — never its body text (Chat says
+      // "Messages can only be seen by people in the call", which must not count).
+      const box = l.closest("aside, [role=complementary], [role=dialog], [role=region], section") || l.parentElement;
+      const head = box ? (box.getAttribute("aria-label") || q("h1, h2, h3, [role=heading]", box)?.textContent || "") : "";
+      const inPanel = /^(people|participants|in the meeting|in call|contributors)\b/i.test(head.trim()) ||
+        /\b(people|participants|in the meeting|in call)\b/i.test(l.getAttribute("aria-label") || "");
       const score = named * 2 + (inPanel ? 5 : 0);
       if (named && inPanel && score > bestScore) { best = l; bestScore = score; }
     });
@@ -550,7 +553,7 @@
   const hasCollapsedGroup = (list) => qa('[aria-expanded="false"]', list).some((b) => GROUP_HEADER.test(labelOf(b) || (b.textContent || "").trim()));
   function looksComplete(list, panelNames, { needCount }) {
     const sc = scrollerOf(list);
-    const scrolledAll = sc === list ? list.scrollHeight <= list.clientHeight + 2 || atBottom(list) : sc.scrollTop <= 1 && atBottom(sc);
+    const scrolledAll = sc.scrollTop <= 1 && atBottom(sc); // the whole list fits on screen
     if (!scrolledAll || hasCollapsedGroup(list)) return false;
     const count = peopleCount();
     if (count == null) return !needCount;
@@ -565,7 +568,7 @@
     let bottom = false;
     for (let i = 0; i < 60; i++) { // cap ≈ 60 steps (about 300 people)
       (scanPanel() || []).forEach((n) => names.add(n));
-      if (sc === list || atBottom(sc)) { bottom = true; break; }
+      if (atBottom(sc)) { bottom = true; break; }
       const before = sc.scrollTop;
       sc.scrollTop += Math.max(100, Math.floor(sc.clientHeight * 0.8));
       await sleep(120);
@@ -603,14 +606,15 @@
     if (!silent) roster.dismissed.clear();
     syncing = true;
     setSyncState(true);
-    let clicked = false, appeared = wasOpen;
+    let clicked = false, appeared = wasOpen, ourList = null;
     try {
       if (!wasOpen) {
         clicked = safeClick(btn, "open People panel");
         if (!clicked) { screenSync(silent); return; }
       }
       for (let i = 0; i < 30 && !participantsList(); i++) await sleep(100);
-      if (participantsList()) appeared = true;
+      ourList = participantsList();
+      if (ourList) appeared = true;
       await sleep(400); // let the list render
       let list = participantsList();
       log("sync: panel list found =", !!list);
@@ -633,7 +637,7 @@
         roster.lastSyncCount = peopleCount();
       }
     } finally {
-      if (clicked) undoOpen({ appeared, silent });
+      if (clicked) undoOpen({ appeared, ourList, silent });
       syncing = false;
       setSyncState(false);
     }
@@ -641,8 +645,10 @@
 
   // SAFE-003: close the panel WE opened — but only while our People list is still the one showing,
   // using a freshly found People button. If something else (Chat, Activities) replaced it, don't click.
-  function undoOpen({ appeared, silent }) {
-    const listShowing = !!participantsList();
+  function undoOpen({ appeared, ourList, silent }) {
+    const now = participantsList();
+    // The list showing must be the one we opened (or Meet re-rendered ours, so the old element is gone).
+    const listShowing = !!now && (!ourList || now === ourList || !ourList.isConnected);
     if (listShowing || !appeared) {
       // Our list is showing (normal case), or it never appeared at all: revert our own click.
       if (safeClick(peopleButton(), listShowing ? "close People panel" : "revert click (no list appeared)") && listShowing) return;

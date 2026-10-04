@@ -95,8 +95,8 @@
       "spec": "GRH-050",
       "desc": "sync no longer closes the People panel it opened",
       "file": "extension/content.js",
-      "find": "if (clicked) undoOpen({ appeared, silent });",
-      "replace": "if (clicked && !appeared) undoOpen({ appeared, silent });",
+      "find": "if (clicked) undoOpen({ appeared, ourList, silent });",
+      "replace": "if (clicked && !appeared) undoOpen({ appeared, ourList, silent });",
       "killedBy": [
         "roster-sync.test.js",
         "safety.test.js"
@@ -284,6 +284,39 @@
       "find": "button[aria-label*=\"leave\" i][aria-label*=\"call\" i]')",
       "replace": "button[aria-label*=\"leave\" i][aria-label*=\"call\" i], [jsname=\"CQylAd\"]')",
       "killedBy": []
+    },
+    {
+      "id": "SYNC-004b",
+      "spec": "SYNC-004",
+      "desc": "the panel is judged by its body text again (Chat mentions 'people')",
+      "file": "extension/content.js",
+      "find": "/^(people|participants|in the meeting|in call|contributors)\\b/i.test(head.trim())",
+      "replace": "/(people|participants|in the meeting|in call|contributors)/i.test(head + \" \" + ((box && box.innerText) || \"\"))",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "SYNC-002b",
+      "spec": "SYNC-002",
+      "desc": "a list that is its own scroll container is never scrolled",
+      "file": "extension/content.js",
+      "find": "      if (atBottom(sc)) { bottom = true; break; }",
+      "replace": "      if (sc === list || atBottom(sc)) { bottom = true; break; }",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "ROSTER-002b",
+      "spec": "ROSTER-002",
+      "desc": "/_meet/<code> URLs stop counting as meetings",
+      "file": "extension/content.js",
+      "find": "const MEETING_PATH = /^\\/(?:_meet\\/)?(?:",
+      "replace": "const MEETING_PATH = /^\\/(?:",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
     }
   ]
 }

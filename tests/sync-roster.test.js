@@ -45,6 +45,17 @@ test("SYNC-002 a full sync collects all 150 people in a long virtualised list", 
   await close();
 });
 
+for (const count of [true, false]) {
+  test(`SYNC-002b a list that is itself the scroll container is scrolled to the end (headcount badge: ${count})`, async () => {
+    const people = peopleNames(40);
+    const { page, close } = await openMeet({ browser, clock: true, body: panelPage({ people, virtual: true, selfScroll: true, count }) });
+    await tick(page, 12000);
+    assert.deepStrictEqual(await names(page), sorted(people), "only the rows on screen were read");
+    assert.ok(!(await sideOpen(page)), "People panel left open");
+    await close();
+  });
+}
+
 test("SYNC-003 a watcher tick in the middle of a sync doesn't drop people", async () => {
   // No headcount badge and a collapsed "Contributors" group: before the sync expands it, the list
   // looks complete but shows only the host. A watcher tick at that moment must not act on it.
@@ -119,6 +130,13 @@ test("ROSTER-002 names added on the Meet home screen are never saved", async () 
   assert.deepStrictEqual(await names(page), ["Asha Rao"]);
   const keys = await page.evaluate(() => Object.keys(localStorage).filter((k) => /^meetSpark:(manual|excluded|spoken):/.test(k)));
   assert.deepStrictEqual(keys, [], "per-meeting keys written on the home screen");
+  await close();
+});
+
+test("ROSTER-002b /_meet/<code> URLs are meetings too and save under the meeting code", async () => {
+  const { page, close } = await openMeet({ browser, clock: true, url: "https://meet.google.com/_meet/abc-defg-hij?authuser=0" });
+  await addName(page, "Asha Rao");
+  assert.deepStrictEqual(await storage(page, "manual:abc-defg-hij"), ["Asha Rao"]);
   await close();
 });
 

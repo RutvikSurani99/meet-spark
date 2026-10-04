@@ -113,11 +113,13 @@
       "SYNC-001",
       "SYNC-001b",
       "SYNC-002",
+      "SYNC-002b",
       "SYNC-003",
       "SYNC-REENTRY",
       "SYNC-004",
       "ROSTER-001",
       "ROSTER-002",
+      "ROSTER-002b",
       "ROSTER-004"
     ],
     "trusted-types.test.js": [
