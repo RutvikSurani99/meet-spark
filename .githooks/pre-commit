@@ -2,8 +2,9 @@
 # PROTECTED FILE — fast guardrails on every commit (docs/GUARDRAILS.md). Bypassing with --no-verify is not allowed.
 set -e
 cd "$(git rev-parse --show-toplevel)"
-echo "▶ pre-commit: check · lint · guard · content policy"
+echo "▶ pre-commit: check · lint · guard · content policy · lint self-test"
 npm run -s check
 npm run -s lint
 npm run -s guard
 node tests/content-policy.test.js
+node tests/lint-bypass.test.js

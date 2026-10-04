@@ -1,0 +1,289 @@
+{
+  "_comment": "PROTECTED FILE — GR-12 mutation gate (docs/specs/guardrails-hardening.md GRH-050). Each mutant re-introduces a real mistake; `npm run mutate` must kill all of them. Every bug fix adds a mutant that re-introduces the bug (GRH-053). Never delete a mutant to make the gate pass.",
+  "mutants": [
+    {
+      "id": "M1",
+      "spec": "GRH-040",
+      "desc": "Bingo diagonals removed",
+      "file": "extension/content.js",
+      "find": "  LINES.push([0, 6, 12, 18, 24], [4, 8, 12, 16, 20]);",
+      "replace": "",
+      "killedBy": [
+        "features.test.js"
+      ]
+    },
+    {
+      "id": "M2",
+      "spec": "GRH-041",
+      "desc": "auto-sync keeps running when switched OFF",
+      "file": "extension/content.js",
+      "find": "if (store.get(\"autoSync\", true) === false || syncPaused) return;",
+      "replace": "if (syncPaused) return;",
+      "killedBy": [
+        "features.test.js"
+      ]
+    },
+    {
+      "id": "M3",
+      "spec": "ROSTER-003",
+      "desc": "passive expiry 90 s → 5 s",
+      "file": "extension/content.js",
+      "find": "const PASSIVE_EXPIRY_MS = 90000;",
+      "replace": "const PASSIVE_EXPIRY_MS = 5000;",
+      "killedBy": [
+        "features.test.js"
+      ]
+    },
+    {
+      "id": "M4",
+      "spec": "GRH-032",
+      "desc": "aria-checked check removed from safeCandidate()",
+      "file": "extension/content.js",
+      "find": " || el.hasAttribute(\"aria-checked\")",
+      "replace": "",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "M5",
+      "spec": "GRH-032",
+      "desc": "safeCandidate() ignores UNSAFE_LABEL",
+      "file": "extension/content.js",
+      "find": "return !UNSAFE_LABEL.test(label);",
+      "replace": "return !UNSAFE_LABEL.test(label.slice(0, 0));",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "M6",
+      "spec": "GRH-042",
+      "desc": "Diagnose stops masking names",
+      "file": "extension/content.js",
+      "find": "return t ? `${t[0]}…(${t.length})` : \"\";",
+      "replace": "return t;",
+      "killedBy": [
+        "features.test.js"
+      ]
+    },
+    {
+      "id": "M7",
+      "spec": "GRH-020",
+      "desc": "switch clicked via HTMLElement.prototype.click.call",
+      "file": "extension/content.js",
+      "find": "  function peopleButton() {",
+      "replace": "  function peopleButton() {\n    HTMLElement.prototype.click.call(document.body);",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "M8",
+      "spec": "GRH-050",
+      "desc": "fullSync() loses its re-entry guard",
+      "file": "extension/content.js",
+      "find": "    if (syncing) return;\n",
+      "replace": "",
+      "killedBy": [
+        "sync-roster.test.js",
+        "roster-sync.test.js"
+      ]
+    },
+    {
+      "id": "M9",
+      "spec": "GRH-050",
+      "desc": "sync no longer closes the People panel it opened",
+      "file": "extension/content.js",
+      "find": "if (clicked) undoOpen({ appeared, silent });",
+      "replace": "if (clicked && !appeared) undoOpen({ appeared, silent });",
+      "killedBy": [
+        "roster-sync.test.js",
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "M10",
+      "spec": "GRH-050",
+      "desc": "esc() stops escaping HTML",
+      "file": "extension/content.js",
+      "find": "const esc = (s) => s.replace(",
+      "replace": "const esc = (s) => s || s.replace(",
+      "killedBy": [
+        "features.test.js"
+      ]
+    },
+    {
+      "id": "M11",
+      "spec": "GRH-050",
+      "desc": "manifest asks for the tabs permission",
+      "file": "extension/manifest.json",
+      "find": "\"manifest_version\": 3,",
+      "replace": "\"manifest_version\": 3,\n  \"permissions\": [\"tabs\"],",
+      "killedBy": []
+    },
+    {
+      "id": "M12",
+      "spec": "GRH-050",
+      "desc": "a religious icebreaker slips into the content",
+      "file": "extension/content.js",
+      "find": "\"Chai or filter coffee — and how do you take it?\",",
+      "replace": "\"Chai or filter coffee — and how do you take it?\",\n      \"Which temple do you visit on weekends?\",",
+      "killedBy": [
+        "content-policy.test.js"
+      ]
+    },
+    {
+      "id": "SAFE-001",
+      "spec": "SAFE-001",
+      "desc": "safeClick() stops re-checking safeCandidate()",
+      "file": "extension/content.js",
+      "find": "if (!el || !el.isConnected || !safeCandidate(el)) {",
+      "replace": "if (!el || !el.isConnected) {",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "SAFE-002",
+      "spec": "SAFE-002",
+      "desc": "F1 again: expand every aria-expanded control near the list",
+      "file": "extension/content.js",
+      "find": "qa('[aria-expanded=\"false\"]', list)\n      .filter((b) => GROUP_HEADER.test(labelOf(b) || (b.textContent || \"\").trim()))",
+      "replace": "qa('[aria-expanded=\"false\"]', list.parentElement || list)\n      .filter(Boolean)",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "SAFE-003",
+      "spec": "SAFE-003",
+      "desc": "undo click even when another panel replaced the People list",
+      "file": "extension/content.js",
+      "find": "if (listShowing || !appeared) {",
+      "replace": "if (listShowing || appeared || !appeared) {",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "SAFE-004",
+      "spec": "SAFE-004",
+      "desc": "UNSAFE_LABEL stops matching plurals (\"Meeting options\")",
+      "file": "extension/content.js",
+      "find": ")(s|es|d|ed|ing)?\\b/i;",
+      "replace": ")\\b/i;",
+      "killedBy": [
+        "safety.test.js"
+      ]
+    },
+    {
+      "id": "SYNC-001",
+      "spec": "SYNC-001",
+      "desc": "a partial People-panel scan replaces the roster",
+      "file": "extension/content.js",
+      "find": "applyScan(panel, complete);",
+      "replace": "applyScan(panel, complete || panel.size > 0);",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "SYNC-002",
+      "spec": "SYNC-002",
+      "desc": "the sync scroll loop stops after 12 steps",
+      "file": "extension/content.js",
+      "find": "for (let i = 0; i < 60; i++) { // cap",
+      "replace": "for (let i = 0; i < 12; i++) { // cap",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "SYNC-003",
+      "spec": "SYNC-003",
+      "desc": "the watcher reads the list in the middle of a sync",
+      "file": "extension/content.js",
+      "find": "    if (syncing) { watcherStats.skippedDuringSync++; return; }",
+      "replace": "    if (syncing && watcherStats.ticks < 0) { watcherStats.skippedDuringSync++; return; }",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "SYNC-004",
+      "spec": "SYNC-004",
+      "desc": "any visible list with names counts as the People panel",
+      "file": "extension/content.js",
+      "find": "if (named && inPanel && score > bestScore)",
+      "replace": "if (named && score > bestScore)",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "ROSTER-001",
+      "spec": "ROSTER-001",
+      "desc": "the meeting-change check is skipped",
+      "file": "extension/content.js",
+      "find": "    checkMeeting(); // ROSTER-001\n",
+      "replace": "    void checkMeeting; // ROSTER-001\n",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "ROSTER-002",
+      "spec": "ROSTER-002",
+      "desc": "names are saved under a 'home' key outside meetings",
+      "file": "extension/content.js",
+      "find": "return m ? (m[1] || \"lookup-\" + m[2]).toLowerCase() : null; };",
+      "replace": "return m ? (m[1] || \"lookup-\" + m[2]).toLowerCase() : \"home\"; };",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "ROSTER-004",
+      "spec": "ROSTER-004",
+      "desc": "stored data is used without validation",
+      "file": "extension/content.js",
+      "find": "const validNames = (v) => (",
+      "replace": "const validNames = (v) => v || (",
+      "killedBy": [
+        "sync-roster.test.js"
+      ]
+    },
+    {
+      "id": "KEYS-001",
+      "spec": "KEYS-001",
+      "desc": "Alt+S fires while typing in Meet's chat",
+      "file": "extension/content.js",
+      "find": "(t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))",
+      "replace": "/^(SELECT)$/.test(t.tagName)",
+      "killedBy": [
+        "keys-diag.test.js"
+      ]
+    },
+    {
+      "id": "DIAG-001",
+      "spec": "DIAG-001",
+      "desc": "Diagnose stops redacting labels",
+      "file": "extension/content.js",
+      "find": "const redact = (t) => (t || \"\")",
+      "replace": "const redact = (t) => t || (t || \"\")",
+      "killedBy": [
+        "keys-diag.test.js"
+      ]
+    },
+    {
+      "id": "DETECT-001",
+      "spec": "DETECT-001",
+      "desc": "leaveButton() uses Meet's obfuscated jsname again",
+      "file": "extension/content.js",
+      "find": "button[aria-label*=\"leave\" i][aria-label*=\"call\" i]')",
+      "replace": "button[aria-label*=\"leave\" i][aria-label*=\"call\" i], [jsname=\"CQylAd\"]')",
+      "killedBy": []
+    }
+  ]
+}

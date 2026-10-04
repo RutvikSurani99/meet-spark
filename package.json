@@ -1,6 +1,6 @@
 {
   "name": "meet-spark",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "private": true,
   "description": "Chrome extension that adds icebreakers, This or That, Meeting Bingo and a speaker picker to Google Meet.",
   "scripts": {
@@ -9,6 +9,9 @@
     "lint": "eslint .",
     "guard": "node scripts/guard.js",
     "verify": "npm run check && npm run lint && npm run guard && npm test",
+    "mutate": "node scripts/mutate.js",
+    "spec:check": "node scripts/spec-check.js",
+    "spec:new": "node scripts/spec-check.js --new",
     "package": "npm run verify && bash scripts/package.sh",
     "setup": "npm install && npx playwright install chromium",
     "prepare": "git config core.hooksPath .githooks || true"

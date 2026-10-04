@@ -3,7 +3,7 @@
 // never delete or loosen an assertion without explicit approval.
 const assert = require("assert");
 const { chromium } = require("playwright");
-const { openMeet, ui, click, text, storage } = require("./helpers/meet");
+const { openMeet, ui, click, text, storage, tick, names, addName, clicks, assertOnlySafeClicks, diagnose } = require("./helpers/meet");
 const { ICEBREAKERS, WYR, BINGO } = require("./helpers/content");
 
 const results = [];
@@ -226,6 +226,86 @@ async function test(name, fn) {
       assert.strictEqual(await storage(page, "autoSync"), false);
       await click(page, "#autoSync");
       assert.strictEqual(await on(), true);
+      await context.close();
+    });
+
+    // ---------------- Added by docs/specs/guardrails-hardening.md (GRH-040..044) ----------------
+    await test("BINGO-3 all 12 lines score (5 rows, 5 columns, 2 diagonals) and FREE counts", async () => {
+      const { page, context } = await fresh();
+      const LINES = [];
+      for (let i = 0; i < 5; i++) { LINES.push([0, 1, 2, 3, 4].map((j) => i * 5 + j)); LINES.push([0, 1, 2, 3, 4].map((j) => j * 5 + i)); }
+      LINES.push([0, 6, 12, 18, 24], [4, 8, 12, 16, 20]);
+      for (const line of LINES) {
+        await click(page, "#bingoNew");
+        for (const i of line) if (i !== 12) await ui(page, (r, n) => r.querySelectorAll("#grid .cell")[n].click(), i);
+        const marked = line.filter((i) => i !== 12).length;
+        assert.strictEqual(await text(page, "#bingoScore"), `${marked} marked · 1 line`, `line ${line} did not score`);
+        const win = await ui(page, (r) => [...r.querySelectorAll("#grid .cell.win")].map((c) => +c.dataset.i));
+        line.filter((i) => i !== 12).forEach((i) => assert.ok(win.includes(i), `cell ${i} of line ${line} not highlighted`));
+      }
+      await context.close();
+    });
+
+    const PANEL_PAGE = (people) => `<body style="background:#202124;height:100vh">
+      <div data-participant-id="a"><span class="notranslate">Rutvik Bharat</span></div>
+      <button aria-label="Leave call">call_end</button>
+      <div><button data-panel-id="1" aria-label="People">people</button><span id="cnt">${people.length}</span></div>
+      <div id="side"></div>
+      <script>window.PEOPLE=${JSON.stringify(people)};
+      document.querySelector('[data-panel-id="1"]').onclick=()=>{const s=document.getElementById('side');
+        if(s.childElementCount){s.replaceChildren();return;}
+        s.innerHTML='<div role="list" aria-label="Participants">'+PEOPLE.map(n=>'<div role="listitem" aria-label="'+n+'">'+n+'</div>').join('')+'</div>';};</script></body>`;
+
+    await test("SET-2 auto-sync OFF never clicks the People button; ON does", async () => {
+      const { page, context } = await openMeet({ browser, clock: true, body: PANEL_PAGE(["Rutvik Bharat (You)", "Asha Rao", "Vikram Singh"]) });
+      await click(page, "#autoSync"); // OFF before the first automatic sync
+      await tick(page, 20000);
+      await page.evaluate(() => { window.PEOPLE.push("Meera Iyer"); document.getElementById("cnt").textContent = "4"; });
+      await tick(page, 30000);
+      assert.strictEqual((await clicks(page)).length, 0, "auto-sync is OFF but Spark clicked Meet's DOM");
+      await click(page, "#autoSync"); // ON → syncs straight away
+      await tick(page, 6000);
+      assert.ok((await clicks(page)).length > 0, "auto-sync ON did not sync");
+      await assertOnlySafeClicks(page);
+      await context.close();
+    });
+
+    await test("DIAG-1 Diagnose report masks participant names", async () => {
+      const people = ["Rutvik Bharat (You)", "Asha Rao", "Vikram Singh", "Priya Nair"];
+      const { page, context } = await openMeet({ browser, clock: true, body: PANEL_PAGE(people) + "<div data-participant-id='b'><span class='notranslate'>Priya Nair</span></div>" });
+      await tick(page, 10000);
+      await page.evaluate(() => document.querySelector('[data-panel-id="1"]').click()); // the user opens the People panel
+      const report = JSON.stringify(await diagnose(page));
+      for (const w of ["Asha", "Vikram", "Priya", "Nair", "Rutvik", "Bharat"]) assert.ok(!report.includes(w), `Diagnose leaked "${w}"`);
+      await context.close();
+    });
+
+    await test("ROSTER-EXP passively seen names expire after 90 s, not before (ROSTER-003, GRH-043)", async () => {
+      const body = `<body><button aria-label="Leave call">call_end</button>
+        <div data-participant-id="a"><span class="notranslate">Asha Rao</span></div>
+        <div data-participant-id="b" id="v"><span class="notranslate">Vikram Singh</span></div></body>`;
+      const { page, context } = await openMeet({ browser, clock: true, body });
+      await tick(page, 10000);
+      assert.deepStrictEqual(await names(page), ["Asha Rao", "Vikram Singh"]);
+      await page.evaluate(() => document.getElementById("v").remove()); // Vikram scrolls out of view
+      await tick(page, 85000);
+      assert.deepStrictEqual(await names(page), ["Asha Rao", "Vikram Singh"], "expired before 90 s");
+      await tick(page, 10000);
+      assert.deepStrictEqual(await names(page), ["Asha Rao"], "not expired after 90 s");
+      await context.close();
+    });
+
+    // GRH-044
+    await test("SPK-7 Pick never lands on an excluded or removed name", async () => {
+      const { page, context } = await openMeet({ browser, clock: true });
+      for (const n of ["Asha Rao", "Priya Nair", "Vikram Singh", "Meera Iyer"]) await addName(page, n);
+      await ui(page, (r) => r.querySelector('#people .person[data-n="Meera Iyer"] .toggle').click()); // exclude
+      await ui(page, (r) => r.querySelector('#people .person[data-n="Vikram Singh"] .rm').click()); // remove
+      await click(page, '#mode [data-m="random"]');
+      const seen = new Set();
+      for (let i = 0; i < 30; i++) { await click(page, "#pickBtn"); await tick(page, 6000); seen.add(await text(page, "#pickedName")); }
+      assert.ok(!seen.has("Meera Iyer") && !seen.has("Vikram Singh"), `picked ${[...seen]}`);
+      assert.deepStrictEqual([...seen].sort(), ["Asha Rao", "Priya Nair"]);
       await context.close();
     });
   } catch (e) { failed = e; }

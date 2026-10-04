@@ -232,7 +232,11 @@
     }
     return a;
   };
-  const meetingId = () => (location.pathname.split("/")[1] || "home");
+  // ROSTER-002: a meeting code (abc-defg-hij) or a /lookup/ path; null on the home screen and other pages.
+  const MEETING_PATH = /^\/(?:([a-z]{3}-[a-z]{4}-[a-z]{3})|lookup\/([\w-]+))(?:[/?#]|$)/i;
+  const meetingId = () => { const m = location.pathname.match(MEETING_PATH); return m ? (m[1] || "lookup-" + m[2]).toLowerCase() : null; };
+  // ROSTER-004: stored data is validated before use; anything of the wrong shape is ignored.
+  const validNames = (v) => (Array.isArray(v) ? v.filter((n) => typeof n === "string" && n.trim() && n.length <= 80) : []);
   const store = {
     get(k, d) { try { const v = localStorage.getItem(`meetSpark:${k}`); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(`meetSpark:${k}`, JSON.stringify(v)); } catch {} }
@@ -288,13 +292,30 @@
   }
   // STRICT matching — never click toggles/settings (e.g. "Let participants send messages").
   const PEOPLE_LABEL = /^(people|show everyone|everyone|participants|show participants|view participants)\b/i;
-  const UNSAFE_LABEL = /\b(let|allow|turn|send|message|chat|mute|remove|lock|admit|deny|host|settings|option|access)\b/i;
+  // SAFE-004: also plurals and verb forms ("Meeting options", "Everyone messages", "Muted").
+  const UNSAFE_LABEL = /\b(let|allow|turn|send|message|chat|mute|remove|lock|admit|deny|host|settings|option|access)(s|es|d|ed|ing)?\b/i;
   function safeCandidate(el) {
     if (!visible(el)) return false;
     const role = el.getAttribute("role");
     if (role === "switch" || role === "checkbox" || role === "menuitemcheckbox" || el.hasAttribute("aria-checked")) return false;
     const label = labelOf(el);
     return !UNSAFE_LABEL.test(label);
+  }
+  // SAFE-001: the ONLY place Spark clicks Meet's DOM. Re-checks safeCandidate() at click time and
+  // refuses elements Meet has removed or replaced. Every caller passes a reason for the debug log.
+  function safeClick(el, reason) {
+    if (!el || !el.isConnected || !safeCandidate(el)) { log("safeClick refused:", reason); return false; }
+    log("click:", reason, labelOf(el) || firstWord(el));
+    // eslint-disable-next-line no-restricted-syntax -- G1-REVIEWED: the single reviewed click site; safeCandidate() is checked on the line above (GR-2, SAFE-001)
+    el.click();
+    return true;
+  }
+  // SAFE-002: group headers inside the participants list that may be expanded ("Contributors" etc.).
+  const GROUP_HEADER = /\b(contributors|in the meeting|in call|participants|others|guests)\b/i;
+  function expandGroups(list) {
+    qa('[aria-expanded="false"]', list)
+      .filter((b) => GROUP_HEADER.test(labelOf(b) || (b.textContent || "").trim()))
+      .forEach((b) => safeClick(b, "expand group"));
   }
   function peopleButton() {
     const all = qa('button, [role="button"]');
@@ -306,7 +327,8 @@
     return byIcon || null;
   }
   function leaveButton() {
-    return q('button[aria-label*="Leave call" i], button[aria-label*="leave" i][aria-label*="call" i], [jsname="CQylAd"]') ||
+    // DETECT-001: aria-label and the call_end icon only — never Meet's obfuscated jsname attributes.
+    return q('button[aria-label*="Leave call" i], button[aria-label*="leave" i][aria-label*="call" i]') ||
       qa("button").find((b) => firstWord(b) === "call_end") || null;
   }
   const inCall = () => !!(leaveButton() || peopleButton() || q("[data-participant-id]"));
@@ -329,7 +351,8 @@
 
   // People panel list: prefer labelled lists, otherwise the list whose rows carry aria-labels.
   function participantsList() {
-    const labelled = q('[role="list"][aria-label*="articipant" i], [role="list"][aria-label*="in the meeting" i], [role="list"][aria-label*="in call" i]');
+    // SYNC-004: only a visible list, and in the fallback only one inside a People/participants panel.
+    const labelled = qa('[role="list"][aria-label*="articipant" i], [role="list"][aria-label*="in the meeting" i], [role="list"][aria-label*="in call" i]').find(visible);
     if (labelled) return labelled;
     const lists = qa('[role="list"]').filter((l) => visible(l));
     let best = null, bestScore = 0;
@@ -340,7 +363,7 @@
         (l.closest("aside, [role=complementary], [role=dialog], [role=region]") || l.parentElement || l).getAttribute?.("aria-label") ||
         (l.closest("aside, [role=complementary], [role=dialog], [role=region]") || {}).innerText?.slice(0, 200) || "");
       const score = named * 2 + (inPanel ? 5 : 0);
-      if (named && score > bestScore) { best = l; bestScore = score; }
+      if (named && inPanel && score > bestScore) { best = l; bestScore = score; }
     });
     return best;
   }
@@ -399,11 +422,21 @@
   }
 
   // --- Diagnostics: structure only, names are masked ---
+  // DIAG-001: free-text labels keep only known control words; anything else (names!) becomes "…".
+  const DIAG_WORDS = new Set(("people everyone everyone's participants participant show hide view more options option for leave call end " +
+    "mic microphone camera video audio turn on off present presenting presentation now raise raised hand hands pin unpin keep " +
+    "settings host hosts controls control captions meeting details activities reactions react mute muted unmute remove from the " +
+    "in with all panel side close open send message messages chat let can to and your you admit deny lock emoji effects background " +
+    "share sharing screen tile tiles layout change full exit record recording transcript is are of a an by waiting join joined " +
+    "contributors list info information tools apps add others guests search menu new tab window button main stage spotlight group groups").split(" "));
+  const redact = (t) => (t || "").replace(/\s+/g, " ").trim().split(" ").filter(Boolean)
+    .map((w) => { const k = w.toLowerCase().replace(/[^a-z_'-]/g, ""); return DIAG_WORDS.has(k) || /_/.test(w) || /^\(?\d+\)?[,.:]?$/.test(w) ? w : "…"; })
+    .join(" ").replace(/…(?:\s+…)+/g, "…");
   function diagnose() {
     const mask = (t) => { t = (t || "").trim().replace(/\s+/g, " "); return t ? `${t[0]}…(${t.length})` : ""; };
     const btn = peopleButton();
     const lists = qa('[role="list"]').map((l) => ({
-      label: l.getAttribute("aria-label"), visible: visible(l),
+      label: redact(l.getAttribute("aria-label")), visible: visible(l),
       rows: qa('[role="listitem"]', l).length,
       rowsWithLabel: qa('[role="listitem"][aria-label]', l).length,
       sampleRow: (() => { const r = q('[role="listitem"]', l); if (!r) return null;
@@ -415,9 +448,9 @@
     const t0 = tiles[0];
     const info = {
       version: (typeof chrome !== "undefined" && chrome.runtime?.getManifest?.().version) || "dev",
-      path: location.pathname, inCall: inCall(),
+      path: meetingId() ? "/<meeting>" : "/", inCall: inCall(),
       leaveButton: !!leaveButton(),
-      peopleButton: btn ? { aria: btn.getAttribute("aria-label"), panelId: btn.getAttribute("data-panel-id"), text: (btn.innerText || "").slice(0, 30) } : null,
+      peopleButton: btn ? { aria: btn.hasAttribute("aria-label") ? redact(btn.getAttribute("aria-label")) : null, panelId: btn.getAttribute("data-panel-id"), text: redact((btn.innerText || "").slice(0, 30)) } : null,
       peopleCount: peopleCount(),
       selfName: !!selfName(),
       participantsListFound: !!participantsList(),
@@ -426,32 +459,37 @@
       tileSample: t0 ? { attrs: [...t0.attributes].map((a) => a.name), textLines: (t0.innerText || "").split("\n").slice(0, 5).map(mask),
         notranslate: qa(".notranslate,[translate=no]", t0).map((e) => mask(e.textContent)).slice(0, 4) } : null,
       detected: { panel: scanPanel()?.size ?? null, tiles: scanTiles().size, roster: roster.all().length },
-      buttons: qa('button, [role="button"]').map((b) => labelOf(b) || ("icon:" + firstWord(b))).filter((l) => l && l.length < 60 && !/…\(/.test(l)).slice(0, 60),
+      buttons: qa('button, [role="button"]').filter((b) => !b.closest("#meet-spark-host")).map((b) => redact(labelOf(b)) || ("icon:" + redact(firstWord(b)))).filter((l) => l && l.length < 60).slice(0, 60),
       peopleLikeControls: qa('button, [role="button"], [role="tab"], [aria-label], [data-tooltip]')
         .filter((el) => /people|everyone|participant|group/i.test(labelOf(el) + " " + firstWord(el)))
-        .slice(0, 15).map((el) => ({ tag: el.tagName.toLowerCase(), role: el.getAttribute("role"), label: labelOf(el).slice(0, 60),
-          icon: firstWord(el).slice(0, 20), attrs: [...el.attributes].map((a) => a.name).filter((n) => !/^(class|style|jsaction|jscontroller|jsmodel)$/.test(n)),
+        .slice(0, 15).map((el) => ({ tag: el.tagName.toLowerCase(), role: el.getAttribute("role"), label: redact(labelOf(el)).slice(0, 60),
+          icon: redact(firstWord(el)).slice(0, 20), attrs: [...el.attributes].map((a) => a.name).filter((n) => !/^(class|style|jsaction|jscontroller|jsmodel)$/.test(n)),
           pressed: el.getAttribute("aria-pressed"), visible: visible(el) })),
       dataAttrs: (() => { const c = {}; qa("*").forEach((el) => { for (const a of el.attributes) if (a.name.startsWith("data-")) c[a.name] = (c[a.name] || 0) + 1; });
         return Object.entries(c).sort((x, y) => y[1] - x[1]).slice(0, 50).map(([k, v]) => k + ":" + v); })(),
       roles: (() => { const c = {}; qa("[role]").forEach((el) => { const r = el.getAttribute("role"); c[r] = (c[r] || 0) + 1; }); return c; })(),
-      regions: qa('[role="region"], [role="complementary"], [role="dialog"], aside, [role="tabpanel"]').map((el) => ({ role: el.getAttribute("role") || el.tagName.toLowerCase(), label: labelOf(el).slice(0, 50), visible: visible(el) })).slice(0, 15),
+      regions: qa('[role="region"], [role="complementary"], [role="dialog"], aside, [role="tabpanel"]').map((el) => ({ role: el.getAttribute("role") || el.tagName.toLowerCase(), label: redact(labelOf(el)).slice(0, 50), visible: visible(el) })).slice(0, 15),
       noTranslate: qa('.notranslate, [translate="no"]').filter(visible).slice(0, 12).map((el) => ({ tag: el.tagName.toLowerCase(), text: mask(el.textContent), parentAttrs: [...(el.parentElement?.attributes || [])].map((a) => a.name).filter((n) => n.startsWith("data-") || n === "jsname" || n === "role") })),
-      syncPaused
+      syncPaused,
+      watcher: { ...watcherStats }
     };
     return JSON.stringify(info, null, 1);
   }
 
-  // Roster state: name -> { lastSeen, source }
+  // Roster state: name -> { lastSeen, source }. Per-meeting parts are loaded for the current meeting
+  // (ROSTER-001) and never saved outside a meeting (ROSTER-002).
+  let currentMeeting = meetingId();
   const roster = {
     live: new Map(),
-    manual: new Set(store.get(`manual:${meetingId()}`, [])),
-    excluded: new Set(store.get(`excluded:${meetingId()}`, [])),
+    manual: new Set(currentMeeting ? validNames(store.get(`manual:${currentMeeting}`, [])) : []),
+    excluded: new Set(currentMeeting ? validNames(store.get(`excluded:${currentMeeting}`, [])) : []),
     dismissed: new Set(), // removed by the user; not re-added by passive scans until the next manual sync
     lastFullSync: 0,
+    lastSyncCount: undefined,
     save() {
-      store.set(`manual:${meetingId()}`, [...this.manual]);
-      store.set(`excluded:${meetingId()}`, [...this.excluded]);
+      if (!currentMeeting) return; // ROSTER-002: home screen / non-meeting pages keep names in memory only
+      store.set(`manual:${currentMeeting}`, [...this.manual]);
+      store.set(`excluded:${currentMeeting}`, [...this.excluded]);
     },
     remove(n) { this.live.delete(n); this.manual.delete(n); this.excluded.delete(n); this.dismissed.add(n); this.save(); },
     clear() { this.dismissed = new Set([...this.dismissed, ...this.live.keys()]); this.live.clear(); this.manual.clear(); this.excluded.clear(); this.save(); },
@@ -462,6 +500,8 @@
     active() { return this.all().filter((n) => !this.excluded.has(n)); }
   };
 
+  // ROSTER-003 (F2): names seen only on tiles/avatars are dropped after 90 s without being seen again.
+  const PASSIVE_EXPIRY_MS = 90000;
   function applyScan(names, authoritative) {
     const now = Date.now();
     let changed = false;
@@ -471,32 +511,86 @@
       roster.live.set(n, { lastSeen: now });
     });
     if (authoritative) {
-      // People panel lists everyone currently in the call — drop anyone not in it.
+      // A COMPLETE People-panel scan lists everyone in the call — drop anyone not in it.
       [...roster.live.keys()].forEach((n) => { if (!names.has(n)) { roster.live.delete(n); changed = true; } });
       // Manually added names are not touched by sync.
     } else {
-      // Tiles only show part of the call; expire names unseen for 3 minutes.
       [...roster.live.entries()].forEach(([n, v]) => {
-        if (now - v.lastSeen > 90000) { roster.live.delete(n); changed = true; }
+        if (now - v.lastSeen > PASSIVE_EXPIRY_MS) { roster.live.delete(n); changed = true; }
       });
     }
     if (changed) renderPeople();
   }
 
+  // ROSTER-001: when the meeting code changes without a page reload, start that meeting's own roster.
+  function checkMeeting() {
+    const id = meetingId();
+    if (id === currentMeeting) return false;
+    log("meeting changed:", currentMeeting ? "<meeting>" : "none", "→", id ? "<meeting>" : "none");
+    currentMeeting = id;
+    roster.live.clear(); roster.dismissed.clear();
+    roster.manual = new Set(id ? validNames(store.get(`manual:${id}`, [])) : []);
+    roster.excluded = new Set(id ? validNames(store.get(`excluded:${id}`, [])) : []);
+    roster.lastFullSync = 0; roster.lastSyncCount = undefined;
+    syncPaused = false; joinedAt = 0;
+    loadSpoken();
+    renderPeople();
+    return true;
+  }
+
+  // SYNC-001: is this People-list scan the WHOLE call? Only then may it remove people from the roster.
+  const scrollerOf = (list) => {
+    for (let el = list; el && el !== document.body; el = el.parentElement) {
+      const oy = getComputedStyle(el).overflowY;
+      if ((oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight) return el;
+    }
+    return list;
+  };
+  const atBottom = (sc) => sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2;
+  const hasCollapsedGroup = (list) => qa('[aria-expanded="false"]', list).some((b) => GROUP_HEADER.test(labelOf(b) || (b.textContent || "").trim()));
+  function looksComplete(list, panelNames, { needCount }) {
+    const sc = scrollerOf(list);
+    const scrolledAll = sc === list ? list.scrollHeight <= list.clientHeight + 2 || atBottom(list) : sc.scrollTop <= 1 && atBottom(sc);
+    if (!scrolledAll || hasCollapsedGroup(list)) return false;
+    const count = peopleCount();
+    if (count == null) return !needCount;
+    return panelNames.size >= count - 1; // "You" may be missing from Meet's count
+  }
+
+  // SYNC-001 / SYNC-002: scroll through the (virtualised) list until the bottom, collecting every name.
+  async function collectPanel(list) {
+    const sc = scrollerOf(list);
+    const start = sc.scrollTop;
+    const names = new Set();
+    let bottom = false;
+    for (let i = 0; i < 60; i++) { // cap ≈ 60 steps (about 300 people)
+      (scanPanel() || []).forEach((n) => names.add(n));
+      if (sc === list || atBottom(sc)) { bottom = true; break; }
+      const before = sc.scrollTop;
+      sc.scrollTop += Math.max(100, Math.floor(sc.clientHeight * 0.8));
+      await sleep(120);
+      if (sc.scrollTop === before) { (scanPanel() || []).forEach((n) => names.add(n)); bottom = true; break; }
+    }
+    sc.scrollTop = start; // put the user's scroll position back
+    const count = peopleCount();
+    const complete = bottom && !hasCollapsedGroup(list) && (count == null || names.size >= count - 1);
+    return { names, complete };
+  }
+
   let syncing = false;
-  let syncPaused = false; // set if a sync click did not open a People list
-  // Sync from what's on screen (used when Meet's People button can't be found).
+  let syncPaused = false; // set if a sync could not finish safely
+  let joinedAt = 0;
+  const watcherStats = { ticks: 0, skippedDuringSync: 0 };
+  // Sync from what's on screen (used when there is no People button and no open People list).
   function screenSync(silent) {
     if (!silent) roster.dismissed.clear();
     const names = scanVisible();
-    const panelOpen = !!(scanPanel() || []).size;
     if (names.size) applyScan(names, true);
     roster.lastFullSync = Date.now();
     renderPeople();
-    log("screen sync:", names.size, "names, panel open:", panelOpen);
+    log("screen sync:", names.size, "names");
     if (!silent) {
       if (!names.size) toast("No names found. Open Meet's People panel, then tap sync.");
-      else if (panelOpen) toast(`Synced ${names.size} from the People panel`);
       else toast(`Synced ${names.size} from screen — open the People panel to include everyone`);
     }
   }
@@ -504,80 +598,84 @@
   async function fullSync({ silent = false } = {}) {
     if (syncing) return;
     const btn = peopleButton();
-    if (!btn || (scanPanel() || []).size) return screenSync(silent);
+    const wasOpen = !!participantsList();
+    if (!btn && !wasOpen) return screenSync(silent);
     if (!silent) roster.dismissed.clear();
     syncing = true;
     setSyncState(true);
-    const wasOpen = !!participantsList();
+    let clicked = false, appeared = wasOpen;
     try {
-      // eslint-disable-next-line no-restricted-syntax -- G1-REVIEWED: btn comes from peopleButton(), which only returns safeCandidate() elements
-      if (!wasOpen) btn.click();
+      if (!wasOpen) {
+        clicked = safeClick(btn, "open People panel");
+        if (!clicked) { screenSync(silent); return; }
+      }
       for (let i = 0; i < 30 && !participantsList(); i++) await sleep(100);
+      if (participantsList()) appeared = true;
       await sleep(400); // let the list render
-      log("sync: panel list found =", !!participantsList());
-      const list = participantsList();
+      let list = participantsList();
+      log("sync: panel list found =", !!list);
       if (list) {
-        // Expand collapsed groups (e.g. "Contributors")
-        // eslint-disable-next-line no-restricted-syntax -- KNOWN-F1: not checked by safeCandidate(); fix in Phase 0 (docs/GUARDRAILS.md §5)
-        qa('[aria-expanded="false"]', list.parentElement || list).forEach((b) => b.click());
+        expandGroups(list); // SAFE-002: only "Contributors"-style headers inside the list
         await sleep(200);
-        // Scroll through virtualised lists so every row renders
-        let scroller = list;
-        for (let el = list; el && el !== document.body; el = el.parentElement) {
-          const oy = getComputedStyle(el).overflowY;
-          if ((oy === "auto" || oy === "scroll") && el.scrollHeight > el.clientHeight) { scroller = el; break; }
-        }
-        const collected = new Set();
-        for (let i = 0; i < 12; i++) {
-          (scanPanel() || []).forEach((n) => collected.add(n));
-          const before = scroller.scrollTop;
-          scroller.scrollTop += 400;
-          await sleep(120);
-          if (scroller.scrollTop === before) break;
-        }
-        scroller.scrollTop = 0;
-        scanVisible().forEach((n) => collected.add(n));
-        if (collected.size) applyScan(collected, true);
+        list = participantsList() || list;
+        const { names, complete } = await collectPanel(list);
+        const panelSize = names.size;
+        scanTiles().forEach((n) => names.add(n));
+        const me = selfName(); if (me) names.add(me);
+        if (names.size) applyScan(names, complete);
         roster.lastFullSync = Date.now();
         roster.lastSyncCount = peopleCount();
-        log("sync: collected", collected.size, "names");
-        if (!silent) toast(`Synced ${collected.size} participant${collected.size === 1 ? "" : "s"}`);
+        log("sync: collected", panelSize, "names, complete =", complete);
+        if (!silent) toast(complete ? `Synced ${panelSize} participant${panelSize === 1 ? "" : "s"}`
+          : `Synced ${panelSize} so far. Scroll the People panel to the bottom or tap sync again.`);
       } else {
         screenSync(true);
         roster.lastSyncCount = peopleCount();
       }
     } finally {
-      if (!wasOpen) {
-        const opened = !!participantsList();
-        // eslint-disable-next-line no-restricted-syntax -- G1-REVIEWED: re-clicks the same safeCandidate() People button to undo our own click (GR-3 sync rule)
-        btn.click(); // close the panel we opened (or undo an unexpected click)
-        if (!opened) {
-          syncPaused = true;
-          log("sync: People list never appeared — auto-sync paused for this page");
-          if (!silent) toast("Synced from screen. For everyone, open Meet's People panel and tap sync.");
-        }
-      }
+      if (clicked) undoOpen({ appeared, silent });
       syncing = false;
       setSyncState(false);
     }
   }
 
+  // SAFE-003: close the panel WE opened — but only while our People list is still the one showing,
+  // using a freshly found People button. If something else (Chat, Activities) replaced it, don't click.
+  function undoOpen({ appeared, silent }) {
+    const listShowing = !!participantsList();
+    if (listShowing || !appeared) {
+      // Our list is showing (normal case), or it never appeared at all: revert our own click.
+      if (safeClick(peopleButton(), listShowing ? "close People panel" : "revert click (no list appeared)") && listShowing) return;
+      syncPaused = true;
+      log("sync: People list never appeared — auto-sync paused for this page");
+      if (!silent) toast("Synced from screen. For everyone, open Meet's People panel and tap sync.");
+      return;
+    }
+    syncPaused = true;
+    log("sync: another panel replaced the People list — not clicking; auto-sync paused");
+    if (!silent) toast("Sync paused: Meet's side panel changed. Tap sync again when the People panel is closed.");
+  }
+
   // Passive watcher: reads tiles/panel continuously, triggers a full sync when the headcount changes.
-  let joinedAt = 0;
   setInterval(() => {
+    checkMeeting(); // ROSTER-001
     if (!inCall()) { joinedAt = 0; updateCount(); return; }
     if (!joinedAt) joinedAt = Date.now();
+    watcherStats.ticks++;
+    if (syncing) { watcherStats.skippedDuringSync++; return; } // SYNC-003: never read a list mid-sync
 
-    const panel = scanPanel();
+    const list = participantsList();
+    const panel = list ? scanPanel() : null;
     if (panel && panel.size) {
+      const complete = looksComplete(list, panel, { needCount: true }); // SYNC-001
       const me = selfName(); if (me) panel.add(me);
-      applyScan(panel, true);
+      applyScan(panel, complete);
     } else {
       const seen = scanVisible();
       if (seen.size) applyScan(seen, false);
     }
 
-    if (!store.get("autoSync", true) || syncing || syncPaused) return;
+    if (store.get("autoSync", true) === false || syncPaused) return;
     const count = peopleCount();
     const since = Date.now() - roster.lastFullSync;
     const firstSync = roster.lastFullSync === 0 && Date.now() - joinedAt > 4000;
@@ -848,7 +946,15 @@
   const setOpen = (open) => { panel.classList.toggle("open", open); launcher.classList.toggle("on", open); };
   launcher.addEventListener("click", () => setOpen(!panel.classList.contains("open")));
   $("#close").addEventListener("click", () => setOpen(false));
-  document.addEventListener("keydown", (e) => { if (e.altKey && e.code === "KeyS") { e.preventDefault(); setOpen(!panel.classList.contains("open")); } });
+  // KEYS-001: Alt+S only — never while typing (Meet chat, inputs, contenteditable), never with Ctrl/Cmd
+  // (AltGr is Ctrl+Alt on Windows), never on key repeat. If it isn't ours, don't block the keystroke.
+  document.addEventListener("keydown", (e) => {
+    if (!e.altKey || e.ctrlKey || e.metaKey || e.repeat || e.code !== "KeyS") return;
+    const t = e.composedPath()[0];
+    if (t && t.nodeType === 1 && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    e.preventDefault();
+    setOpen(!panel.classList.contains("open"));
+  });
 
   const showView = (v) => {
     $$(".nav button").forEach((b) => b.classList.toggle("active", b.dataset.v === v));
@@ -856,7 +962,9 @@
     store.set("tab", v);
   };
   $$(".nav button").forEach((b) => b.addEventListener("click", () => showView(b.dataset.v)));
-  showView(store.get("tab", "ice"));
+  const VIEWS = ["ice", "wyr", "bingo", "people"];
+  const savedTab = store.get("tab", "ice");
+  showView(VIEWS.includes(savedTab) ? savedTab : "ice"); // ROSTER-004
 
   const toast = (msg) => {
     const s = $("#snack"); s.textContent = msg; s.classList.add("show");
@@ -884,7 +992,7 @@
 
   /* ---------- Icebreakers ---------- */
   const cats = Object.keys(ICEBREAKERS);
-  let cat = store.get("cat", cats[0]);
+  let cat = store.get("cat", cats[0]); // validated just below (ROSTER-004)
   if (!cats.includes(cat)) cat = cats[0];
   const decks = {};
   let iceCurrent = null;
@@ -959,12 +1067,20 @@
   };
   $("#bingoNew").addEventListener("click", newBingo);
   $("#bingoCopy").addEventListener("click", () => copy("Meeting Bingo is on — open Meet Spark → Bingo and mark squares as they happen. First to five in a row wins."));
-  if (!bingo || !Array.isArray(bingo.items) || bingo.items.length !== 25) newBingo(); else renderBingo();
+  // ROSTER-004: only restore a stored card of the right shape.
+  const isIdx = (max) => (x) => Number.isInteger(x) && x >= 0 && x < max;
+  const validBingo = (b) => !!b && Array.isArray(b.items) && b.items.length === 25 && b.items.every((t) => typeof t === "string") &&
+    Array.isArray(b.marked) && b.marked.every(isIdx(25)) && b.marked.includes(12) && Array.isArray(b.won) && b.won.every(isIdx(LINES.length));
+  if (!validBingo(bingo)) newBingo(); else renderBingo();
 
   /* ---------- Speakers ---------- */
   let mode = store.get("mode", "round");
-  let spoken = new Set(store.get(`spoken:${meetingId()}`, []));
-  const saveSpoken = () => store.set(`spoken:${meetingId()}`, [...spoken]);
+  if (mode !== "round" && mode !== "random") mode = "round"; // ROSTER-004
+  // "Already spoken" is per meeting (ROSTER-001) and never saved outside a meeting (ROSTER-002).
+  let spoken = new Set();
+  function loadSpoken() { spoken = new Set(currentMeeting ? validNames(store.get(`spoken:${currentMeeting}`, [])) : []); }
+  loadSpoken();
+  const saveSpoken = () => { if (currentMeeting) store.set(`spoken:${currentMeeting}`, [...spoken]); };
   const setMode = (m) => { mode = m; store.set("mode", m); $$("#mode button").forEach((b) => b.classList.toggle("active", b.dataset.m === m)); renderPeople(); };
   $$("#mode button").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.m)));
 
@@ -1010,7 +1126,7 @@
     const joined = inCall();
     const live = $("#liveState");
     live.classList.toggle("off", !joined);
-    live.textContent = joined ? (store.get("autoSync", true) ? "Live" : "Manual") : "Not in call";
+    live.textContent = joined ? (store.get("autoSync", true) !== false ? "Live" : "Manual") : "Not in call";
   }
   function setSyncState(on) {
     const b = $("#syncBtn");
@@ -1080,8 +1196,9 @@
   $("#addName").addEventListener("keyup", (e) => e.stopPropagation());
 
   const auto = $("#autoSync");
-  const renderAuto = () => { auto.classList.toggle("on", store.get("autoSync", true)); updateCount(); };
-  auto.addEventListener("click", () => { store.set("autoSync", !store.get("autoSync", true)); renderAuto(); if (store.get("autoSync", true)) fullSync({ silent: true }); });
+  const autoOn = () => store.get("autoSync", true) !== false;
+  const renderAuto = () => { auto.classList.toggle("on", autoOn()); updateCount(); };
+  auto.addEventListener("click", () => { store.set("autoSync", !autoOn()); renderAuto(); if (autoOn()) fullSync({ silent: true }); });
   renderAuto();
   setMode(mode);
 })();

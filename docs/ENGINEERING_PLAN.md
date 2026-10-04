@@ -15,7 +15,7 @@ This plan moves Meet Spark from a working prototype (a single 1,080-line `conten
 
 
 1. **Docs first.** No code change starts until the docs that describe it are updated and approved. The order is always **docs/spec → approval → tests → code → notes/changelog**.
-2. **All docs live in `docs/`.** That includes README, CONTRIBUTING, SECURITY, CHANGELOG, specs and ADRs. GitHub recognises `docs/README.md`, `docs/CONTRIBUTING.md` and `docs/SECURITY.md` automatically.
+2. **All docs live in `docs/`.** That includes README, CONTRIBUTING, SECURITY, CHANGELOG, specs and ADRs. GitHub recognises `docs/README.md`, `docs/CONTRIBUTING.md` and `docs/SECURITY.md` automatically (CONTRIBUTING and SECURITY: Phase 1).
    *One exception:* a 2-line root `CLAUDE.md` stub that imports `docs/CLAUDE.md`. Claude Code only auto-loads instructions from the repo root, so the stub has to stay there.
 3. **Guardrails are never weakened to make a change pass.** If a guardrail blocks a change, propose an ADR instead.
 
@@ -191,7 +191,7 @@ ID prefix: ROSTER · Status: Draft | Approved | Implemented · Version: 1
 ## Changelog
 ```
 
-### Architecture Decision Records (`docs/adr/`)
+### Architecture Decision Records (`docs/adr/`, created in Phase 1)
 - ADR-0001: WXT + React + TypeScript (Next.js and vanilla JS considered and rejected)
 - ADR-0002: `browser.storage.local` instead of page `localStorage` (F3)
 - ADR-0003: Single `safeClick()` choke point for all Meet DOM clicks (F1)

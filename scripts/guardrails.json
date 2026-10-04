@@ -1,12 +1,176 @@
 {
-  "_comment": "PROTECTED FILE — see docs/GUARDRAILS.md. Every eslint-disable in extension/ must be listed here (GR-4).",
-  "allowedPermissions": ["storage"],
-  "allowedMatches": ["https://meet.google.com/*"],
-  "requiredUnsafeWords": ["let", "allow", "turn", "send", "message", "chat", "mute", "remove", "lock", "admit", "deny", "host", "settings", "option", "access"],
-  "rootMarkdownAllowed": ["CLAUDE.md"],
+  "_comment": "PROTECTED FILE — the configuration of every repo guardrail (docs/GUARDRAILS.md). Changing it needs approval and a relock.",
+  "allowedPermissions": [
+    "storage"
+  ],
+  "allowedMatches": [
+    "https://meet.google.com/*"
+  ],
+  "requiredUnsafeWords": [
+    "let",
+    "allow",
+    "turn",
+    "send",
+    "message",
+    "chat",
+    "mute",
+    "remove",
+    "lock",
+    "admit",
+    "deny",
+    "host",
+    "settings",
+    "option",
+    "access"
+  ],
+  "unsafePlurals": true,
+  "rootMarkdownAllowed": [
+    "CLAUDE.md"
+  ],
   "suppressions": [
-    { "file": "extension/content.js", "rule": "no-restricted-syntax", "tag": "G2-REVIEWED", "count": 2, "why": "setHTML() is the single TT-safe HTML sink" },
-    { "file": "extension/content.js", "rule": "no-restricted-syntax", "tag": "G1-REVIEWED", "count": 2, "why": "fullSync() opens/closes the safeCandidate() People button" },
-    { "file": "extension/content.js", "rule": "no-restricted-syntax", "tag": "KNOWN-F1", "count": 1, "why": "Known unsafe aria-expanded click; remove this entry when F1 is fixed", "knownIssue": "F1" }
+    {
+      "file": "extension/content.js",
+      "rule": "no-restricted-syntax",
+      "tag": "G2-REVIEWED",
+      "count": 2,
+      "why": "setHTML() is the single TT-safe HTML sink"
+    },
+    {
+      "file": "extension/content.js",
+      "rule": "no-restricted-syntax",
+      "tag": "G1-REVIEWED",
+      "count": 1,
+      "why": "safeClick() is the single click site into Meet's DOM (SAFE-001)"
+    }
+  ],
+  "_lockedScripts": "GRH-011: the gate commands. package.json must match exactly.",
+  "lockedScripts": {
+    "check": "node --check extension/content.js",
+    "lint": "eslint .",
+    "guard": "node scripts/guard.js",
+    "test": "node tests/run.js",
+    "verify": "npm run check && npm run lint && npm run guard && npm test",
+    "mutate": "node scripts/mutate.js",
+    "spec:check": "node scripts/spec-check.js"
+  },
+  "_requiredTests": "GRH-012: every test file and test ID that must exist. Deleting or renaming one fails the guard. Add new IDs here when you add tests.",
+  "requiredTests": {
+    "content-policy.test.js": [
+      "CONTENT-1"
+    ],
+    "features.test.js": [
+      "LAUNCH-1",
+      "LAUNCH-2",
+      "TABS-1",
+      "ICE-1",
+      "ICE-2",
+      "ICE-3",
+      "WYR-1",
+      "BINGO-1",
+      "BINGO-2",
+      "BINGO-3",
+      "SPK-1",
+      "SPK-2",
+      "SPK-3",
+      "SPK-4",
+      "SPK-5",
+      "SPK-6",
+      "SPK-7",
+      "SET-1",
+      "SET-2",
+      "DIAG-1",
+      "ROSTER-EXP"
+    ],
+    "keys-diag.test.js": [
+      "KEYS-001",
+      "DIAG-001"
+    ],
+    "lint-bypass.test.js": [
+      "LINT-1",
+      "LINT-2"
+    ],
+    "markup-variants.test.js": [
+      "VARIANT-A-aria",
+      "VARIANT-A-text",
+      "VARIANT-B-aria",
+      "VARIANT-B-text"
+    ],
+    "remove-clear-sync.test.js": [
+      "RCS-1"
+    ],
+    "roster-sync.test.js": [
+      "SYNC-JOIN",
+      "SYNC-UI"
+    ],
+    "safety.test.js": [
+      "SAFETY-1",
+      "SAFETY-2",
+      "SAFE-002",
+      "SAFE-003",
+      "SAFE-TABLE"
+    ],
+    "sync-roster.test.js": [
+      "SYNC-001",
+      "SYNC-001b",
+      "SYNC-002",
+      "SYNC-003",
+      "SYNC-REENTRY",
+      "SYNC-004",
+      "ROSTER-001",
+      "ROSTER-002",
+      "ROSTER-004"
+    ],
+    "trusted-types.test.js": [
+      "TT-1",
+      "TT-2"
+    ]
+  },
+  "_protectedFiles": "GR-10 / GRH-010: Claude Code must ask before editing these (.claude/settings.json). All except package.json are also fingerprinted in scripts/guardrails.lock.json (GRH-014).",
+  "protectedFiles": [
+    "eslint.config.js",
+    "scripts/guard.js",
+    "scripts/guardrails.json",
+    "scripts/mutate.js",
+    "scripts/mutants.json",
+    "scripts/spec-check.js",
+    "tests/run.js",
+    "tests/helpers/meet.js",
+    "tests/helpers/content.js",
+    "tests/helpers/mock-meet.js",
+    "tests/sync-roster.test.js",
+    "tests/keys-diag.test.js",
+    "tests/content-policy.test.js",
+    "tests/features.test.js",
+    "tests/lint-bypass.test.js",
+    "tests/markup-variants.test.js",
+    "tests/remove-clear-sync.test.js",
+    "tests/roster-sync.test.js",
+    "tests/safety.test.js",
+    "tests/trusted-types.test.js",
+    ".githooks/pre-commit",
+    ".githooks/commit-msg",
+    ".githooks/pre-push",
+    ".github/workflows/ci.yml",
+    ".github/pull_request_template.md",
+    ".claude/settings.json",
+    ".claude/commands/spec.md",
+    ".claude/commands/implement.md"
+  ],
+  "unlockedProtectedFiles": [
+    "package.json"
+  ],
+  "_settings": "GRH-001 / GRH-003: entries .claude/settings.json must contain.",
+  "requiredDeny": [
+    "Bash(git commit --no-verify:*)",
+    "Bash(git commit -n:*)",
+    "Bash(git push --no-verify:*)",
+    "Bash(git push --force:*)",
+    "Bash(git push -f:*)",
+    "Bash(git config core.hooksPath:*)",
+    "Bash(git -c core.hooksPath:*)",
+    "Bash(git -c core.hookspath:*)",
+    "Bash(HUSKY=0:*)",
+    "Bash(node scripts/guard.js --relock:*)",
+    "Bash(npm run guard -- --relock:*)"
   ]
 }

@@ -54,4 +54,5 @@ const dupPairs = WYR.map((p) => p.map((s) => s.toLowerCase()).sort().join("|"));
 dupPairs.forEach((k, i) => { if (dupPairs.indexOf(k) !== i) problems.push(`WYR[${i}]: duplicate pair`); });
 
 assert.deepStrictEqual(problems, [], "content policy violations:\n" + problems.join("\n"));
-console.log(`PASS content-policy (${all.length} strings, ${cats.length} categories, ${WYR.length} pairs, ${BINGO.length} bingo)`);
+console.log(`  ✓ CONTENT-1 policy, counts and duplicates (${all.length} strings, ${cats.length} categories, ${WYR.length} pairs, ${BINGO.length} bingo)`);
+console.log("PASS content-policy (1 test)");

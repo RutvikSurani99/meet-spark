@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# PROTECTED FILE — GR-14 spec-first gate (docs/GUARDRAILS.md). Bypassing with --no-verify is not allowed.
+# A commit that changes extension/ must name a requirement ID from a spec that was already Approved.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+node scripts/spec-check.js --commit-msg "$1"
