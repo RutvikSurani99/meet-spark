@@ -201,7 +201,14 @@
       "PSTY-032",
       "PSTY-033",
       "PSTY-034",
-      "PSTY-035"
+      "PSTY-035",
+      "PTILE-001",
+      "PTILE-002",
+      "PTILE-003",
+      "PTILE-004",
+      "PTILE-005",
+      "PTILE-006",
+      "PTILE-007"
     ]
   },
   "_protectedFiles": "GR-10 / GRH-010: Claude Code must ask before editing these (.claude/settings.json). All except package.json are also fingerprinted in scripts/guardrails.lock.json (GRH-014).",

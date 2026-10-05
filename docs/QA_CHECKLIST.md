@@ -18,5 +18,6 @@ Setup: load the unpacked `extension/` folder in Chrome (`docs/README.md`), join 
 | 10 | Move to another meeting without reloading | The new meeting starts with an empty list; going back restores the old one | ROSTER-001 |
 | 11 | Pick next speaker with each Animation style, then with Surprise me a few times | Popup over the call, lands on the name shown, confetti; Surprise me shows all six once, then changes style every time | PSTY-003, PSTY-004, PSTY-006, PSTY-030…035 |
 | 12 | Share your screen or tab and pick | The popup appears in what you share (only the extension draws it); Done closes it and the panel shows the name | PSTY-019, non-goal note |
+| 13 | Look at the Animation tiles, hover each, use the arrow keys | Only the selected/hovered tile moves; Departure board fits on one line; arrows change the choice without triggering Meet shortcuts | PTILE-003, PTILE-005, PTILE-006 |
 
 If anything fails, run **Diagnose** in that call and start a spec (`/spec` or `npm run spec:new`) with the report attached.

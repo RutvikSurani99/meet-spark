@@ -1,5 +1,5 @@
 # Picker style tiles: visual Animation picker — Spec
-ID prefix: PTILE · Status: **Approved** (2026-10-05) · Approved 2026-10-05 by Rutvik · Version: 1 · Owner: Rutvik Bharat
+ID prefix: PTILE · Status: **Implemented** (2026-10-05, v2.7.0) · Approved 2026-10-05 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Changes the UI of PSTY-001 in `docs/specs/picker-styles.md` (the Animation setting). Behaviour of the styles, Surprise me and storage (PSTY-002…006) is unchanged.
 
 ## Problem / goal
@@ -39,3 +39,4 @@ CSS and fixed markup only (`setHTML` for static markup, GR-3); listeners only on
 ## Changelog
 - 2026-10-05 v1: Draft, from Rutvik's request for small animation highlights instead of a dropdown.
 - 2026-10-05 v1: Approved by Rutvik (both proposed answers accepted).
+- 2026-10-05 v1: Implemented in v2.7.0. Tests PTILE-001…007 in `tests/picker-styles.test.js`; mutants M-PTILE-…. Selected tile names stay regular weight so "Departure board" fits on one line.

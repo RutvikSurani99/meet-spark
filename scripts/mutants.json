@@ -1150,6 +1150,149 @@
       "killedBy": [
         "picker-styles.test.js"
       ]
+    },
+    {
+      "id": "M-PTILE-001",
+      "spec": "PTILE-001",
+      "desc": "Tiles lose their previews",
+      "file": "extension/content.js",
+      "find": "${TILE_ART[k]}",
+      "replace": "${TILE_ART[k] && \"\"}",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-002",
+      "spec": "PTILE-002",
+      "desc": "The selected tile isn't marked checked",
+      "file": "extension/content.js",
+      "find": "      b.setAttribute(\"aria-checked\", String(on));\n",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-002b",
+      "spec": "PTILE-002",
+      "desc": "Choosing a tile isn't saved",
+      "file": "extension/content.js",
+      "find": "    store.set(\"pickStyle\", pickStyle);\n    renderTiles();",
+      "replace": "    renderTiles();",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-003",
+      "spec": "PTILE-003",
+      "desc": "Every tile preview moves all the time",
+      "file": "extension/content.js",
+      "find": "  .ptile .ptv *, .ptile .pt-ic svg { animation-play-state: paused !important; } /* PTILE-003: still unless selected or hovered */\n",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-003b",
+      "spec": "PTILE-003",
+      "desc": "Previews ignore reduce motion",
+      "file": "extension/content.js",
+      "find": "  @media (prefers-reduced-motion: reduce) { .ptv *, .pt-ic svg { animation: none !important; } }\n",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-004",
+      "spec": "PTILE-004",
+      "desc": "Tour dots never fill",
+      "file": "extension/content.js",
+      "find": "d.classList.toggle(\"f\", i < n)",
+      "replace": "d.classList.toggle(\"f\", false)",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-004b",
+      "spec": "PTILE-004",
+      "desc": "Shown dots appear even without Surprise me",
+      "file": "extension/content.js",
+      "find": "b.classList.toggle(\"seen\", sur && styleSeen.has(b.dataset.s));",
+      "replace": "b.classList.toggle(\"seen\", (sur || pickStyle) && styleSeen.has(b.dataset.s));",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-004c",
+      "spec": "PTILE-004",
+      "desc": "The tour on the tile doesn't update after a pick",
+      "file": "extension/content.js",
+      "find": "    renderTiles(); // PTILE-004\n  };",
+      "replace": "  };",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-005",
+      "spec": "PTILE-005",
+      "desc": "Arrow keys don't move between tiles",
+      "file": "extension/content.js",
+      "find": "const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];",
+      "replace": "const step = 0;",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-005b",
+      "spec": "PTILE-005",
+      "desc": "Keys in the tiles reach Meet",
+      "file": "extension/content.js",
+      "find": "keys never reach Meet\n    e.stopPropagation();",
+      "replace": "keys never reach Meet",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-005c",
+      "spec": "PTILE-005",
+      "desc": "Every tile is in the Tab order",
+      "file": "extension/content.js",
+      "find": "      b.tabIndex = on ? 0 : -1;\n",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-006",
+      "spec": "PTILE-006",
+      "desc": "The selected tile's name is bold and no longer fits",
+      "file": "extension/content.js",
+      "find": "  .ptile[aria-checked=\"true\"] { border: 2px solid #0b57d0; background: #eef3fe; color: #041e49; }",
+      "replace": "  .ptile[aria-checked=\"true\"] { border: 2px solid #0b57d0; background: #eef3fe; color: #041e49; font-weight: 700; }",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PTILE-007",
+      "spec": "PTILE-007",
+      "desc": "The card doesn't say which style picked",
+      "file": "extension/content.js",
+      "find": "    $(\"#pickedStyle\").textContent = `Picked with: ${PSTY[pop.style]}`; // PTILE-007\n",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
     }
   ]
 }

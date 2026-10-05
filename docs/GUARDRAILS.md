@@ -65,6 +65,7 @@ Every behaviour has a requirement ID in a spec, a test whose **name** carries th
 | Meeting Bingo | `docs/specs/bingo.md` | BINGO-001…008 | features, ui-backfill |
 | Speakers: list and picker | `docs/specs/speakers.md` | SPK-001…016 | features, ui-backfill |
 | Picker popup and animation styles | `docs/specs/picker-styles.md` | PSTY-001…006, PSTY-010…027, PSTY-030…035 | picker-styles, ui-backfill, features |
+| Animation picker tiles | `docs/specs/picker-style-tiles.md` | PTILE-001…007 | picker-styles |
 | Copy to chat | `docs/specs/copy-to-chat.md` | COPY-001…006 | ui-backfill |
 | Auto-sync and manual sync | `docs/specs/sync.md`, `docs/specs/v2.5.1-fixes.md` | SYNC-101…108, SYNC-001…004 | sync-backfill, sync-roster, roster-sync, remove-clear-sync |
 | Roster and detection | `docs/specs/roster-and-detection.md`, `docs/specs/v2.5.1-fixes.md` | ROSTER-101…110, ROSTER-001…004, DETECT-001 | sync-backfill, sync-roster, markup-variants, features |

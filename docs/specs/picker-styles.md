@@ -96,3 +96,4 @@ Shared: the popup is ~640×560 px (shrinks to fit small windows), dark backdrop,
 - 2026-10-05 v2: Draft amendment PSTY-006 (Surprise me shows all six styles once before going random), requested by Rutvik.
 - 2026-10-05 v2: Approved by Rutvik (both proposed answers accepted).
 - 2026-10-05 v2: Implemented in v2.6.1. Test PSTY-006; mutants M-PSTY-006, -006b, -006c, -006d.
+- 2026-10-05: PSTY-001's dropdown replaced by tiles, see `docs/specs/picker-style-tiles.md` (v2.7.0).

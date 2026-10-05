@@ -5,6 +5,15 @@ Every entry names the spec requirement IDs it implements (see `docs/specs/`).
 
 ## [Unreleased]
 
+## [2.7.0] — 2026-10-05
+Spec: `docs/specs/picker-style-tiles.md` v1.
+
+### Changed
+- The **Animation** dropdown is now a set of tiles: a Surprise me tile plus six style tiles, each with a tiny live CSS preview that plays only when selected or hovered (and never with reduce motion) (PTILE-001…003).
+- The Surprise me tile shows the tour ("2 of 6 shown" with progress dots); while it's selected, styles already shown this meeting get a green dot (PTILE-004).
+- Arrow keys move between tiles as one radio group; keys never reach Meet (PTILE-005). Tiles fit the 360 px panel (PTILE-006).
+- The picker card now says which animation made the last pick ("Picked with: Wheel") (PTILE-007).
+
 ## [2.6.1] — 2026-10-05
 Spec: `docs/specs/picker-styles.md` v2.
 

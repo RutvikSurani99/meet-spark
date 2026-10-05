@@ -553,6 +553,7 @@
     syncPaused = false; joinedAt = 0;
     loadSpoken();
     loadStyleSeen(); // PSTY-006: each meeting has its own six-style tour
+    renderTiles(); // PTILE-004
     renderPeople();
     return true;
   }
@@ -853,9 +854,60 @@
   @keyframes fall { to { transform: translate(var(--dx), 70vh) rotate(540deg); opacity: 0; } }
   /* Picker popup (docs/specs/picker-styles.md) */
   .ui [hidden] { display: none !important; }
-  .psty-set { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
-  .psty-set label { font-size: 14px; color: #1f1f1f; }
-  .psty-set select { height: 36px; border: 1px solid #c4c7c5; border-radius: 18px; padding: 0 12px; font: inherit; font-size: 13px; color: #1f1f1f; background: #fff; cursor: pointer; }
+  /* Animation picker tiles (docs/specs/picker-style-tiles.md) */
+  .picked-style { font-size: 12px; color: #0b57d0; margin-top: 2px; min-height: 16px; }
+  .ptile-head { display: flex; align-items: baseline; justify-content: space-between; margin: 16px 0 8px; font-size: 14px; font-weight: 500; color: #1f1f1f; }
+  .ptiles { display: flex; flex-direction: column; gap: 8px; }
+  .ptgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .ptile { position: relative; border: 1px solid #e0e3e7; border-radius: 12px; background: #fff; color: #444746; font-size: 12px; font-weight: 500; padding: 0; transition: border-color .15s, background .15s; }
+  .ptile:hover { background: #f8fafd; border-color: #c4c7c5; }
+  .ptile[aria-checked="true"] { border: 2px solid #0b57d0; background: #eef3fe; color: #041e49; }
+  .ptile:focus-visible { outline: 3px solid #a8c7fa; outline-offset: 1px; }
+  .ptgrid .ptile { height: 82px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; min-width: 0; }
+  .pt-nm { max-width: 100%; padding: 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pt-tick { position: absolute; right: 6px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: #0b57d0; color: #fff; display: none; place-items: center; }
+  .ptile[aria-checked="true"] .pt-tick { display: grid; }
+  .pt-seen { position: absolute; left: 7px; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #1e8e3e; display: none; }
+  .ptile.seen .pt-seen { display: block; }
+  .ptile.sp { width: 100%; min-height: 60px; display: flex; align-items: center; gap: 12px; padding: 8px 12px; text-align: left; color: #1f1f1f; }
+  .pt-ic { width: 40px; height: 40px; flex: none; border-radius: 10px; background: linear-gradient(135deg, #0b57d0, #a142f4); display: grid; place-items: center; color: #fff; }
+  .pt-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .pt-tx b { font-size: 14px; }
+  .pt-sub { font-size: 12px; font-weight: 400; color: #5f6368; }
+  .pt-dots { display: flex; gap: 4px; margin-left: auto; flex: none; }
+  .pt-dots i { width: 7px; height: 7px; border-radius: 50%; background: #dadce0; }
+  .pt-dots i.f { background: #0b57d0; }
+  .ptv { width: 58px; height: 36px; position: relative; border-radius: 8px; overflow: hidden; display: grid; place-items: center; }
+  .ptile .ptv *, .ptile .pt-ic svg { animation-play-state: paused !important; } /* PTILE-003: still unless selected or hovered */
+  .ptile:hover .ptv *, .ptile[aria-checked="true"] .ptv *, .ptile:hover .pt-ic svg, .ptile[aria-checked="true"] .pt-ic svg { animation-play-state: running !important; }
+  .pt-ic svg { animation: ptv-tw 1.6s ease-in-out infinite; }
+  .ptv-slot { background: linear-gradient(#7a1022, #4a0613); box-shadow: inset 0 0 0 2px #d4a52c; display: flex; gap: 3px; padding: 5px 6px; }
+  .ptv-slot > span { flex: 1; height: 26px; background: #fff; border-radius: 3px; overflow: hidden; }
+  .ptv-slot > span > span { display: block; animation: ptv-reel .5s linear infinite; }
+  .ptv-slot > span:nth-child(2) > span { animation-duration: .42s; } .ptv-slot > span:nth-child(3) > span { animation-duration: .58s; }
+  .ptv-slot i { display: block; height: 7px; margin: 2px 3px; border-radius: 2px; }
+  .ptv-wheel .wh { width: 34px; height: 34px; border-radius: 50%; background: conic-gradient(#1a73e8 0 60deg, #188038 0 120deg, #e37400 0 180deg, #a142f4 0 240deg, #d93025 0 300deg, #007b83 0); animation: ptv-spin 1.6s cubic-bezier(.3,.1,.3,1) infinite; }
+  .ptv-wheel .pt { position: absolute; left: 50%; top: 0; margin-left: -4px; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 7px solid #1f1f1f; z-index: 1; }
+  .ptv-spot { display: grid; grid-template-columns: repeat(5, 7px); gap: 3px; align-content: center; justify-content: center; }
+  .ptv-spot i { width: 7px; height: 7px; border-radius: 50%; background: #c4c7c5; animation: ptv-glow 2s infinite; }
+  .ptv-cards { perspective: 120px; }
+  .ptv-cards i { position: absolute; top: 5px; width: 19px; height: 27px; border-radius: 4px; background: #0842a0; }
+  .ptv-cards i:first-child { left: 13px; transform: rotate(-10deg); }
+  .ptv-cards i:last-child { left: 24px; background: #0b57d0; animation: ptv-flip 1.8s ease-in-out infinite; }
+  .ptv-board { background: #202124; display: flex; gap: 2px; padding: 0 5px; align-items: center; justify-content: center; }
+  .ptv-board b { width: 10px; height: 16px; border-radius: 2px; background: linear-gradient(#3c4043 0 48%, #111 48% 52%, #35363a 52%); color: #fff; font: 700 10px/16px ui-monospace, Menlo, monospace; text-align: center; animation: ptv-flap 1.6s infinite; }
+  .ptv-board b:nth-child(2) { animation-delay: .12s; } .ptv-board b:nth-child(3) { animation-delay: .24s; } .ptv-board b:nth-child(4) { animation-delay: .36s; }
+  .ptv-count .rg { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 3px solid #d3e3fd; border-top-color: #0b57d0; animation: ptv-ring 1s linear infinite; }
+  .ptv-count .nm { font-weight: 800; font-size: 15px; color: #0b57d0; animation: ptv-num 1s ease-out infinite; }
+  @keyframes ptv-reel { to { transform: translateY(-18px); } }
+  @keyframes ptv-spin { to { transform: rotate(720deg); } }
+  @keyframes ptv-glow { 0%, 8% { background: #fbbc04; box-shadow: 0 0 6px 2px rgba(251,188,4,.8); transform: scale(1.3); } 14%, 100% { background: #c4c7c5; box-shadow: none; transform: none; } }
+  @keyframes ptv-flip { 0%, 30% { transform: rotateY(0); background: #0b57d0; } 50% { transform: rotateY(90deg); background: #0b57d0; } 51%, 85% { transform: rotateY(180deg); background: #fff; box-shadow: inset 0 0 0 2px #fbbc04; } 100% { transform: rotateY(360deg); background: #0b57d0; } }
+  @keyframes ptv-flap { 0%, 40% { transform: scaleY(1); } 48% { transform: scaleY(0); } 56%, 100% { transform: scaleY(1); } }
+  @keyframes ptv-ring { to { transform: rotate(360deg); } }
+  @keyframes ptv-num { 0% { transform: scale(1.5); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1); } }
+  @keyframes ptv-tw { 50% { transform: rotate(20deg) scale(1.15); } }
+  @media (prefers-reduced-motion: reduce) { .ptv *, .pt-ic svg { animation: none !important; } }
   .psty { position: fixed; inset: 0; z-index: 10; background: rgba(12,12,18,.8); display: grid; place-items: center; animation: psty-fade .2s ease-out; }
   .snackbar { z-index: 11; }
   .psty-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
@@ -1035,16 +1087,14 @@
           <div class="picked-avatar" id="pickedAvatar">${icon("person", 32)}</div>
           <div class="picked-name" id="pickedName">Who's next?</div>
           <div class="picked-sub" id="pickedSub"></div>
+          <div class="picked-style" id="pickedStyle"></div>
         </div>
         <div class="seg" id="mode">
           <button data-m="round" class="active">Everyone once</button>
           <button data-m="random">Fully random</button>
         </div>
-        <div class="psty-set">
-          <label for="pickStyle">Animation</label>
-          <select id="pickStyle"></select>
-        </div>
-        <div class="muted" style="margin-top:4px">Surprise me picks a different animation each time.</div>
+        <div class="ptile-head"><span id="ptileLabel">Animation</span><span class="muted" id="ptileHint"></span></div>
+        <div class="ptiles" id="pickStyle" role="radiogroup" aria-labelledby="ptileLabel"></div>
         <div class="actions">
           <button class="btn primary grow" id="pickBtn">Pick next speaker</button>
           <button class="btn text" id="resetRound">Reset</button>
@@ -1319,7 +1369,11 @@
     styleSeen = new Set(Array.isArray(v) ? v.filter((x) => PSTY_STYLES.includes(x)) : []);
   }
   loadStyleSeen();
-  const markStyleSeen = (style) => { styleSeen.add(style); if (currentMeeting) store.set(`styleSeen:${currentMeeting}`, [...styleSeen]); };
+  const markStyleSeen = (style) => {
+    styleSeen.add(style);
+    if (currentMeeting) store.set(`styleSeen:${currentMeeting}`, [...styleSeen]);
+    renderTiles(); // PTILE-004
+  };
   const nextStyle = () => {
     if (pickStyle !== "surprise") return pickStyle;
     const unseen = PSTY_STYLES.filter((x) => !styleSeen.has(x) && x !== pop.last);
@@ -1483,6 +1537,7 @@
     win.querySelector(".psty-name").textContent = w;
     win.hidden = false;
     $("#pstyLive").textContent = `Next speaker: ${w}`;
+    $("#pickedStyle").textContent = `Picked with: ${PSTY[pop.style]}`; // PTILE-007
     if (!still) confetti(pop.style === "slot");
     $("#pstyActs").hidden = false;
     $("#pstyDone").focus();
@@ -1523,11 +1578,51 @@
   });
   $("#pstyDlg").addEventListener("keyup", (e) => e.stopPropagation());
 
-  const styleSel = $("#pickStyle"); // PSTY-001, PSTY-002
-  setHTML(styleSel, Object.entries(PSTY).map(([k, v]) => `<option value="${k}">${v}</option>`).join(""));
-  styleSel.value = pickStyle;
-  styleSel.addEventListener("change", () => { pickStyle = PSTY[styleSel.value] ? styleSel.value : "surprise"; store.set("pickStyle", pickStyle); });
-  ["keydown", "keyup"].forEach((t) => styleSel.addEventListener(t, (e) => e.stopPropagation()));
+  // PTILE-001…006: the Animation setting as tiles with tiny CSS previews (one radio group).
+  const TILE_ART = {
+    slot: `<span class="ptv ptv-slot">${["#d93025,#fbbc04,#0b57d0", "#188038,#a142f4,#fbbc04", "#0b57d0,#d93025,#188038"].map((c) => {
+      const cs = c.split(","); return `<span><span>${[...cs, ...cs.slice(0, 2)].map((x) => `<i style="background:${x}"></i>`).join("")}</span></span>`;
+    }).join("")}</span>`,
+    wheel: '<span class="ptv ptv-wheel"><span class="pt"></span><span class="wh"></span></span>',
+    spotlight: `<span class="ptv ptv-spot">${[0, 7, 3, 11, 5, 13, 1, 9, 14, 4, 12, 2, 8, 6, 10].map((d) => `<i style="animation-delay:${(d * 0.133).toFixed(2)}s"></i>`).join("")}</span>`,
+    cards: '<span class="ptv ptv-cards"><i></i><i></i></span>',
+    board: '<span class="ptv ptv-board"><b>N</b><b>E</b><b>X</b><b>T</b></span>',
+    countdown: '<span class="ptv ptv-count"><span class="rg"></span><span class="nm">3</span></span>',
+  };
+  const TILE_ORDER = ["surprise", ...PSTY_STYLES];
+  const tilesEl = $("#pickStyle");
+  setHTML(tilesEl, `<button class="ptile sp" role="radio" data-s="surprise"><span class="pt-ic">${icon("spark", 22)}</span><span class="pt-tx"><b>Surprise me</b><span class="pt-sub" id="ptileTour"></span></span><span class="pt-dots" aria-hidden="true">${"<i></i>".repeat(6)}</span></button>
+    <div class="ptgrid">${PSTY_STYLES.map((k) => `<button class="ptile" role="radio" data-s="${k}"><span class="pt-seen"></span><span class="pt-tick">${icon("check", 12)}</span>${TILE_ART[k]}<span class="pt-nm">${PSTY[k]}</span></button>`).join("")}</div>`);
+  const tileBtns = () => TILE_ORDER.map((k) => tilesEl.querySelector(`[data-s="${k}"]`));
+  function renderTiles() { // PTILE-002, PTILE-004
+    const sur = pickStyle === "surprise", n = styleSeen.size;
+    tileBtns().forEach((b) => {
+      const on = b.dataset.s === pickStyle;
+      b.setAttribute("aria-checked", String(on));
+      b.tabIndex = on ? 0 : -1;
+      b.classList.toggle("seen", sur && styleSeen.has(b.dataset.s));
+    });
+    $("#ptileTour").textContent = n < PSTY_STYLES.length ? `Every animation once, then random · ${n} of ${PSTY_STYLES.length} shown` : `All ${PSTY_STYLES.length} shown · now random`;
+    tilesEl.querySelectorAll(".pt-dots i").forEach((d, i) => d.classList.toggle("f", i < n));
+    $("#ptileHint").textContent = PSTY[pickStyle];
+  }
+  const chooseStyle = (k, focus) => {
+    pickStyle = TILE_ORDER.includes(k) ? k : "surprise";
+    store.set("pickStyle", pickStyle);
+    renderTiles();
+    if (focus) tilesEl.querySelector(`[data-s="${pickStyle}"]`).focus();
+  };
+  tileBtns().forEach((b) => b.addEventListener("click", () => chooseStyle(b.dataset.s, false)));
+  tilesEl.addEventListener("keydown", (e) => { // PTILE-005: arrow keys move and select; keys never reach Meet
+    e.stopPropagation();
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    const i = TILE_ORDER.indexOf(pickStyle);
+    chooseStyle(TILE_ORDER[(i + step + TILE_ORDER.length) % TILE_ORDER.length], true);
+  });
+  tilesEl.addEventListener("keyup", (e) => e.stopPropagation());
+  renderTiles();
 
   function pickSpeaker({ announce = true, avoid = null } = {}) {
     if (announce && pop.open && !pop.revealed) return null; // PSTY-021: one pick at a time
@@ -1538,7 +1633,7 @@
     if (!pool.length) { spoken.clear(); saveSpoken(); pool = cands; toast("Everyone has spoken — starting a new round"); }
     const winner = pick(pool);
     if (mode === "round") { spoken.add(winner); saveSpoken(); }
-    if (announce) openPicker(winner, active); else { showPicked(winner); renderPeople(); }
+    if (announce) openPicker(winner, active); else { showPicked(winner); $("#pickedStyle").textContent = ""; renderPeople(); }
     return winner;
   }
   function showPicked(n) {
@@ -1552,6 +1647,7 @@
     $("#picker").classList.remove("done");
     $("#pickedAvatar").style.background = ""; setHTML($("#pickedAvatar"), icon("person", 32));
     $("#pickedName").textContent = "Who's next?";
+    $("#pickedStyle").textContent = "";
     renderPeople();
   });
   $("#syncBtn").addEventListener("click", () => { syncPaused = false; fullSync(); });

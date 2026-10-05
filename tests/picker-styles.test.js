@@ -18,7 +18,9 @@ async function setup({ n = 0, list = null, style = null, random = false, body, i
   if (style) await setStyle(out.page, style);
   return { ...out, names };
 }
-const setStyle = (page, v) => ui(page, (r, s) => { const el = r.querySelector("#pickStyle"); el.value = s; el.dispatchEvent(new Event("change")); }, v);
+// The Animation setting is a radio group of tiles (picker-style-tiles.md PTILE-001/002).
+const setStyle = (page, v) => ui(page, (r, s) => r.querySelector(`#pickStyle [data-s="${s}"]`).click(), v);
+const chosen = (page) => ui(page, (r) => [...r.querySelectorAll('#pickStyle [role="radio"][aria-checked="true"]')].map((b) => b.dataset.s).join(","));
 const state = (page) => ui(page, (r) => ({
   open: !r.querySelector("#psty").hidden,
   style: r.querySelector("#pstyDlg").dataset.style,
@@ -58,17 +60,17 @@ async function assertLanded(page, w, note) {
 // ---------------- Choosing a style ----------------
 test("PSTY-001 PSTY-002 the Animation setting defaults to Surprise me, is remembered, and falls back on bad values", async () => {
   const { page, close } = await setup();
-  const opts = await ui(page, (r) => [...r.querySelectorAll("#pickStyle option")].map((o) => o.textContent));
+  const opts = await ui(page, (r) => [...r.querySelectorAll('#pickStyle [role="radio"]')].map((o) => (o.querySelector(".pt-nm") || o.querySelector(".pt-tx b")).textContent.trim()));
   assert.deepStrictEqual(opts, ["Surprise me", "Slot machine", "Wheel", "Spotlight", "Cards", "Departure board", "Countdown"]);
-  assert.strictEqual(await ui(page, (r) => r.querySelector("#pickStyle").value), "surprise");
+  assert.strictEqual(await chosen(page), "surprise");
   await setStyle(page, "wheel");
   assert.strictEqual(await storage(page, "pickStyle"), "wheel");
   await close();
   const saved = await setup({ init: [() => localStorage.setItem("meetSpark:pickStyle", '"wheel"')] });
-  assert.strictEqual(await ui(saved.page, (r) => r.querySelector("#pickStyle").value), "wheel");
+  assert.strictEqual(await chosen(saved.page), "wheel");
   await saved.close();
   const bad = await setup({ init: [() => localStorage.setItem("meetSpark:pickStyle", '"disco"')] });
-  assert.strictEqual(await ui(bad.page, (r) => r.querySelector("#pickStyle").value), "surprise");
+  assert.strictEqual(await chosen(bad.page), "surprise");
   await bad.close();
 });
 
@@ -151,6 +153,98 @@ test("PSTY-006 Surprise me shows all six styles once before going random, per me
   const other = await surprisePicks(d.page, 1, { fresh: true });
   assert.deepStrictEqual(await storage(d.page, "styleSeen:xyz-abcd-efg"), other, "the new meeting did not start fresh");
   await d.close();
+});
+
+// ---------------- Animation picker tiles (docs/specs/picker-style-tiles.md) ----------------
+test("PTILE-001 PTILE-002 the Animation setting is seven tiles with CSS previews; clicking one selects and saves it", async () => {
+  const { page, close } = await setup();
+  const t = await ui(page, (r) => ({
+    select: r.querySelectorAll("#pickStyle select, select#pickStyle").length,
+    group: r.querySelector("#pickStyle").getAttribute("role"),
+    keys: [...r.querySelectorAll('#pickStyle [role="radio"]')].map((b) => b.dataset.s),
+    previews: r.querySelectorAll("#pickStyle .ptv").length,
+    imgs: r.querySelectorAll("#pickStyle img").length,
+  }));
+  assert.deepStrictEqual(t.keys, ["surprise", ...STYLES]);
+  assert.strictEqual(t.select, 0); assert.strictEqual(t.group, "radiogroup");
+  assert.strictEqual(t.previews, 6); assert.strictEqual(t.imgs, 0);
+  await setStyle(page, "wheel");
+  assert.strictEqual(await chosen(page), "wheel");
+  assert.strictEqual(await storage(page, "pickStyle"), "wheel");
+  assert.strictEqual(await text(page, "#ptileHint"), "Wheel");
+  assert.ok(await ui(page, (r) => getComputedStyle(r.querySelector('[data-s="wheel"] .pt-tick')).display !== "none"), "no check mark");
+  await close();
+});
+
+test("PTILE-003 only the selected (or hovered) tile's preview moves, and none with reduce motion", async () => {
+  const { page, close } = await setup({ style: "cards" });
+  await click(page, "#launcher"); await click(page, ".nav [data-v=people]");
+  const states = () => ui(page, (r) => Object.fromEntries([...r.querySelectorAll("#pickStyle .ptile")].filter((b) => b.querySelector(".ptv")).map((b) => {
+    const els = [...b.querySelectorAll(".ptv *")].filter((e) => getComputedStyle(e).animationName !== "none");
+    return [b.dataset.s, els.length ? getComputedStyle(els[0]).animationPlayState : "none"];
+  })));
+  const s1 = await states();
+  assert.strictEqual(s1.cards, "running");
+  assert.ok(STYLES.filter((k) => k !== "cards").every((k) => s1[k] === "paused"), JSON.stringify(s1));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const s2 = await states();
+  assert.ok(Object.values(s2).every((v) => v === "none"), JSON.stringify(s2));
+  await close();
+});
+
+test("PTILE-004 PTILE-007 the Surprise me tile shows the tour; shown tiles get a dot; the card says which style picked", async () => {
+  const { page, close } = await setup({ n: 4, random: true });
+  const tour = () => ui(page, (r) => ({
+    text: r.querySelector("#ptileTour").textContent,
+    dots: r.querySelectorAll("#pickStyle .pt-dots i.f").length,
+    seen: [...r.querySelectorAll("#pickStyle .ptile.seen")].map((b) => b.dataset.s).sort(),
+  }));
+  assert.deepStrictEqual(await tour(), { text: "Every animation once, then random · 0 of 6 shown", dots: 0, seen: [] });
+  const two = await surprisePicks(page, 2, { fresh: true });
+  assert.deepStrictEqual(await tour(), { text: "Every animation once, then random · 2 of 6 shown", dots: 2, seen: [...two].sort() });
+  assert.strictEqual(await text(page, "#pickedStyle"), `Picked with: ${await text(page, "#pstyStyle")}`);
+  await surprisePicks(page, 4);
+  assert.deepStrictEqual(await tour(), { text: "All 6 shown · now random", dots: 6, seen: [...STYLES].sort() });
+  await click(page, "#pstyDone");
+  await setStyle(page, "wheel");
+  assert.deepStrictEqual((await tour()).seen, [], "dots only while Surprise me is selected");
+  await click(page, "#resetRound");
+  assert.strictEqual(await text(page, "#pickedStyle"), "");
+  await close();
+});
+
+test("PTILE-005 the tiles are one radio group: arrow keys move and select, and keys never reach Meet", async () => {
+  const body = `<body><script>window.keys = 0; document.addEventListener("keydown", () => window.keys++);</script></body>`;
+  const { page, close } = await setup({ body });
+  await click(page, "#launcher"); await click(page, ".nav [data-v=people]");
+  const tabbable = await ui(page, (r) => [...r.querySelectorAll('#pickStyle [role="radio"]')].filter((b) => b.tabIndex === 0).map((b) => b.dataset.s));
+  assert.deepStrictEqual(tabbable, ["surprise"], "only the selected tile is in the Tab order");
+  await ui(page, (r) => r.querySelector('#pickStyle [data-s="surprise"]').focus());
+  await page.keyboard.press("ArrowRight");
+  assert.strictEqual(await chosen(page), "slot");
+  assert.strictEqual(await ui(page, (r) => r.activeElement?.dataset.s), "slot");
+  await page.keyboard.press("ArrowLeft"); await page.keyboard.press("ArrowLeft");
+  assert.strictEqual(await chosen(page), "countdown", "arrows wrap around");
+  assert.strictEqual(await storage(page, "pickStyle"), "countdown");
+  assert.strictEqual(await page.evaluate(() => window.keys), 0, "arrow keys reached Meet");
+  await close();
+});
+
+test("PTILE-006 the tiles fit the panel: no horizontal scroll, one-line names, text at least 12 px", async () => {
+  const { page, close } = await setup({ style: "board" });
+  await click(page, "#launcher"); await click(page, ".nav [data-v=people]");
+  const m = await ui(page, (r) => {
+    const view = r.querySelector(".view.active"), group = r.querySelector("#pickStyle");
+    return {
+      scroll: view.scrollWidth - view.clientWidth,
+      wide: group.getBoundingClientRect().width - view.clientWidth,
+      names: [...group.querySelectorAll(".pt-nm")].map((n) => ({ t: n.textContent, over: n.scrollWidth > n.clientWidth, px: parseFloat(getComputedStyle(n).fontSize) })),
+    };
+  });
+  assert.ok(m.scroll <= 0 && m.wide <= 0, JSON.stringify(m));
+  for (const n of m.names) { assert.ok(!n.over, `${n.t} is cut off`); assert.ok(n.px >= 12, `${n.t} is ${n.px}px`); }
+  assert.ok(await ui(page, (r) => [...r.querySelectorAll("#pickStyle .pt-nm")].every((n) => n.getClientRects().length === 1 && n.getBoundingClientRect().height < 24)), "a tile name wraps");
+  await close();
 });
 
 // ---------------- The popup ----------------
@@ -343,7 +437,7 @@ test("PSTY-024 every style also works under Meet's strictest Trusted Types CSP (
   const { page, errors } = out;
   await ui(page, (r, ns) => { for (const v of ns) { r.querySelector("#addName").value = v; r.querySelector("#addBtn").click(); } }, ["Asha Rao", "<b>Bold</b> Name", "Priya"]);
   await click(page, '#mode [data-m="random"]');
-  assert.strictEqual(await ui(page, (r) => r.querySelectorAll("#pickStyle option").length), 7);
+  assert.strictEqual(await ui(page, (r) => r.querySelectorAll('#pickStyle [role="radio"]').length), 7);
   for (const style of STYLES) {
     await setStyle(page, style);
     await click(page, "#pickBtn"); await tick(page, 5000);
