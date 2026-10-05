@@ -71,7 +71,8 @@ async function openMeet({ body = DEFAULT_BODY, csp, browser, url = MEET_URL, clo
   page.on("pageerror", (e) => errors.push(e.message));
   // The browser logs its own console errors when setHTML() falls back under a strict Trusted Types CSP.
   // That fallback is expected (docs/CLAUDE.md, Trusted Types), so only those messages are ignored.
-  const TT_FALLBACK = /requires 'TrustedHTML' assignment|Refused to create a TrustedTypePolicy named 'meet-spark-/;
+  // Chromium words the blocked-policy message as "Refused to create a …" (older) or "Creating a … violates" (1243+) (TTC-001).
+  const TT_FALLBACK = /requires 'TrustedHTML' assignment|TrustedTypePolicy named 'meet-spark-/;
   page.on("console", (m) => { if (m.type() === "error" && !TT_FALLBACK.test(m.text())) errors.push(m.text()); });
   await page.addInitScript(clickRecorder);
   await page.addInitScript(clipboardStub);

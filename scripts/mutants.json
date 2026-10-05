@@ -1293,6 +1293,29 @@
       "killedBy": [
         "picker-styles.test.js"
       ]
+    },
+    {
+      "id": "M-TTC-1",
+      "spec": "TTC-001",
+      "desc": "Test allowlist knows only the old Chromium wording of Spark's blocked-policy message",
+      "file": "tests/helpers/meet.js",
+      "find": "|TrustedTypePolicy named 'meet-spark-/;",
+      "replace": "|Refused to create a TrustedTypePolicy named 'meet-spark-/;",
+      "killedBy": [
+        "tt-console.test.js",
+        "trusted-types.test.js"
+      ]
+    },
+    {
+      "id": "M-TTC-2",
+      "spec": "TTC-002",
+      "desc": "Test allowlist ignores blocked policies of any name",
+      "file": "tests/helpers/meet.js",
+      "find": "|TrustedTypePolicy named 'meet-spark-/;",
+      "replace": "|TrustedTypePolicy named '/;",
+      "killedBy": [
+        "tt-console.test.js"
+      ]
     }
   ]
 }

@@ -140,6 +140,10 @@
       "TT-1",
       "TT-2"
     ],
+    "tt-console.test.js": [
+      "TTC-001",
+      "TTC-002"
+    ],
     "ui-backfill.test.js": [
       "LAUNCH-002",
       "LAUNCH-005",

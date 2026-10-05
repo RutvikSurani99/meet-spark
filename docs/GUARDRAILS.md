@@ -66,6 +66,7 @@ Every behaviour has a requirement ID in a spec, a test whose **name** carries th
 | Speakers: list and picker | `docs/specs/speakers.md` | SPK-001…016 | features, ui-backfill |
 | Picker popup and animation styles | `docs/specs/picker-styles.md` | PSTY-001…006, PSTY-010…027, PSTY-030…035 | picker-styles, ui-backfill, features |
 | Animation picker tiles | `docs/specs/picker-style-tiles.md` | PTILE-001…007 | picker-styles |
+| Trusted Types console message (test collector) | `docs/specs/trusted-types-console.md` | TTC-001…004 | tt-console, trusted-types, markup-variants, picker-styles |
 | Copy to chat | `docs/specs/copy-to-chat.md` | COPY-001…006 | ui-backfill |
 | Auto-sync and manual sync | `docs/specs/sync.md`, `docs/specs/v2.5.1-fixes.md` | SYNC-101…108, SYNC-001…004 | sync-backfill, sync-roster, roster-sync, remove-clear-sync |
 | Roster and detection | `docs/specs/roster-and-detection.md`, `docs/specs/v2.5.1-fixes.md` | ROSTER-101…110, ROSTER-001…004, DETECT-001 | sync-backfill, sync-roster, markup-variants, features |
@@ -90,6 +91,7 @@ Real-call checks that mocks can't cover: `docs/QA_CHECKLIST.md`.
 | Remove / clear vs sync | Removed names stay removed; a manual sync restores | RCS-1 |
 | Meet markup variants | Known button/list shapes under Trusted Types | VARIANT-A-aria, VARIANT-A-text, VARIANT-B-aria, VARIANT-B-text |
 | Trusted Types | Renders under both strict CSPs | TT-1, TT-2 |
+| Trusted Types console | Only Spark's own blocked-policy message is ignored, in both Chromium wordings | TTC-001, TTC-002 |
 | Safety | Unsafe-only page · trap page · People-button table · safe group expand · safe undo | SAFETY-1, SAFETY-2, SAFE-TABLE, SAFE-002, SAFE-003 |
 | Diagnose | Names, labels and the meeting code redacted | DIAG-1, DIAG-001 |
 | Content | Policy, counts, duplicates | CONTENT-1 |

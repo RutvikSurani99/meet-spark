@@ -4,6 +4,10 @@ All notable changes to Meet Spark. Format: [Keep a Changelog](https://keepachang
 Every entry names the spec requirement IDs it implements (see `docs/specs/`).
 
 ## [Unreleased]
+Spec: `docs/specs/trusted-types-console.md` v1.
+
+### Fixed
+- Browser tests failed under the strictest Trusted Types CSP on Chromium 1243 (Playwright 1.63), which rewords the expected blocked-policy console message as "Creating a TrustedTypePolicy named … violates". The test error collector now accepts both wordings for Spark's own `meet-spark-…` policy only, and still reports any other name (TTC-001, TTC-002). No change to the extension (TTC-003). This unblocks the pre-push hook (TTC-004).
 
 ## [2.7.0] — 2026-10-05
 Spec: `docs/specs/picker-style-tiles.md` v1.

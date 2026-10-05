@@ -85,7 +85,7 @@ Browser tests can't download Chromium inside Cowork's sandbox on the Mac, so Cla
 ## Current state (2026-10-04)
 - **v2.5.1** on branch `fix/v2.5.1`: all fixes from `docs/specs/v2.5.1-fixes.md` and all guardrails from `docs/specs/guardrails-hardening.md` (both Implemented).
 - Spec-first workflow is enforced. No spec is Approved right now, so the next code change must start with `/spec` or `npm run spec:new`.
-- Still manual: GitHub repo, branch protection, `guardrail-change` label (GRH-002, `docs/GUARDRAILS.md` §6). Test v2.5.1 in a real call with more than 15 people and send a Diagnose report (it settles the SYNC-001 headcount − 1 threshold).
+- Still manual: branch protection, `guardrail-change` label (GRH-002, `docs/GUARDRAILS.md` §6). Test v2.5.1 in a real call with more than 15 people and send a Diagnose report (it settles the SYNC-001 headcount − 1 threshold).
 - Needs review (flagged in `docs/specs/v2.5.1-fixes.md` v1.1/v1.2): SAFE-004 was added during implementation; `aria-pressed` is allowed on the People button; the passive watcher needs a known headcount before it treats an open panel as complete.
 
 ## Specs
@@ -103,3 +103,4 @@ Every feature has a spec in `docs/specs/` (see the coverage map in `docs/GUARDRA
 - 2026-10-05: v2.6.0: picker popup with six animation styles and Surprise me (PSTY-001…035), designed on the "Speaker Picker Concepts" canvas and built for 100+ people. 98/98 mutants killed.
 - 2026-10-05: v2.6.1: Surprise me shows all six styles once per meeting before going random (PSTY-006).
 - 2026-10-05: v2.7.0: Animation picker tiles with mini previews (PTILE-001…007).
+- 2026-10-05: Chromium 1243 reworded the blocked Trusted Types policy message, so 6 strict-CSP tests failed and the pre-push hook blocked the first GitHub push. The test collector now accepts both wordings for `meet-spark-…` only (TTC-001…004, test-only). Private GitHub repo created: `RutvikSurani99/meet-spark`.
