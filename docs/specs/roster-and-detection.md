@@ -1,5 +1,5 @@
 # Roster and participant detection — Spec
-ID prefix: ROSTER (baseline rows numbered ROSTER-101+; ROSTER-001…004 live in `v2.5.1-fixes.md`) · Status: **Approved** (v2 amendment ROSTER-107…110 approved 2026-10-05 by Rutvik; ROSTER-101…106 Implemented 2026-10-04) · Version: 2 · Owner: Rutvik Bharat
+ID prefix: ROSTER (baseline rows numbered ROSTER-101+; ROSTER-001…004 live in `v2.5.1-fixes.md`) · Status: **Implemented** (v2, 2026-10-05: ROSTER-107…110 approved by Rutvik and implemented in v2.5.2; ROSTER-101…106 implemented 2026-10-04) · Version: 2 · Owner: Rutvik Bharat
 Backfill of current behaviour (v2.5.1). Part of `docs/specs/test-coverage-backfill.md`.
 
 ## Problem / goal
@@ -40,3 +40,4 @@ Detection only reads the DOM. Names stay in this browser.
 - 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).
 - 2026-10-05 v2 (Draft): bug from a real call while someone was presenting. Cause: `cleanName()` strips only exact one-word notes like "(Presenting)", so "(Presenting, annotating)" survived as a second person; `nameFrom()` reads `data-tooltip` on any element, so the presenter tile's zoom button ("Zoom in") was taken as a name. Adds ROSTER-107…110. Tests: ROSTER-101 table extended + a presenter-tile mock; mutants: one per new rule. Wrong entries already in the list disappear on the next full sync or after 90 s.
 - 2026-10-05 v2: Approved by Rutvik.
+- 2026-10-05 v2: Implemented in v2.5.2. Tests ROSTER-107, ROSTER-108 (presenter tile with zoom, pop-out and full-screen controls), ROSTER-109; mutants ROSTER-107, ROSTER-108a/b, ROSTER-109. Note: ROSTER-108's test includes a control whose tooltip isn't on the ROSTER-109 list; without it the phrase list hid whether the button rule works (the mutation gate showed this).

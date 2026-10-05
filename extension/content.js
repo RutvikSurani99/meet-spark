@@ -265,11 +265,15 @@
   /* ============================================================
    * Participant detection
    * ============================================================ */
-  const JUNK = /^(you|me|presentation|presenting|host|meeting host|co-host|more options|more actions|pin|unpin|mute|remove|keep|keep_outline|more_vert|mic|mic_off|mic_none|frame_person|visual_effects|in the meeting|contributors|waiting to join|people|participants)$/i;
+  // ROSTER-109: also Meet's presenting / tile control phrases (backup for ROSTER-108).
+  const JUNK = /^(you|me|presentation|presenting|host|meeting host|co-host|more options|more actions|pin|unpin|mute|remove|keep|keep_outline|more_vert|mic|mic_off|mic_none|frame_person|visual_effects|in the meeting|contributors|waiting to join|people|participants|zoom in|zoom out|reset zoom|fit to frame|fill frame|you are presenting|stop presenting|present now|full screen|exit full screen|backgrounds and effects)$/i;
+  // ROSTER-107: a status note in brackets — "(Presenting)", "(Presenting, annotating)", "(You, presenting)",
+  // "(Host · Presenting)", or cut off without a closing bracket — starts with one of these words.
+  const STATUS_NOTE = /\s*\((?:you|presenting|presentation|host|meeting host|co-host)\b[^)]*(?:\)|$)/gi;
   function cleanName(raw) {
     if (!raw) return null;
     let n = String(raw).split("\n")[0]
-      .replace(/\s*\((you|presenting|presentation|host|meeting host|co-host)\)\s*/gi, " ")
+      .replace(STATUS_NOTE, " ")
       .replace(/\s+/g, " ").trim();
     if (!n || n.length > 60 || n.length < 2) return null;
     if (JUNK.test(n) || /_/.test(n) || /^\d+$/.test(n)) return null;
@@ -374,6 +378,15 @@
     const el = q("[data-self-name]");
     return el ? cleanName(el.getAttribute("data-self-name")) : null;
   }
+  // ROSTER-108: names never come from buttons or other controls (e.g. a presenter tile's "Zoom in" button).
+  const CONTROL = 'button, [role="button"], a, input, select, textarea';
+  const inControl = (c) => !!c.closest?.(CONTROL);
+  // Visible text lines of el, minus any line that is just the text or label of a control inside it.
+  function textLines(el) {
+    const controlText = new Set(qa(CONTROL, el).flatMap((b) => [b.textContent, b.getAttribute("aria-label"), b.getAttribute("data-tooltip"), b.getAttribute("title")])
+      .filter(Boolean).map((t) => t.trim().toLowerCase()));
+    return (el.innerText || "").split("\n").map((x) => x.trim()).filter((x) => x && !controlText.has(x.toLowerCase()));
+  }
   function nameFrom(el) {
     if (!el) return null;
     const self = el.hasAttribute?.("data-self-name") ? el : q("[data-self-name]", el);
@@ -381,11 +394,12 @@
     if (direct) return direct;
     for (const sel of [".notranslate", '[translate="no"]', "[data-tooltip]"]) {
       for (const c of qa(sel, el)) {
+        if (inControl(c)) continue; // ROSTER-108
         const n = cleanName(c.textContent) || cleanName(c.getAttribute("data-tooltip"));
         if (n) return n;
       }
     }
-    const line = (el.innerText || "").split("\n").map((x) => x.trim()).find((x) => cleanName(x));
+    const line = textLines(el).find((x) => cleanName(x)); // ROSTER-108
     return cleanName(line);
   }
   function scanPanel() {
@@ -409,7 +423,7 @@
       if (img.closest("#meet-spark-host")) return;
       let el = img.parentElement;
       for (let i = 0; el && i < 5; i++, el = el.parentElement) {
-        const lines = (el.innerText || "").split("\n").map((x) => x.trim()).filter(Boolean);
+        const lines = textLines(el); // ROSTER-108: skip control labels
         if (lines.length > 8) break; // climbed too far (whole panel)
         const n = lines.map(cleanName).find(Boolean);
         if (n) { names.add(n); break; }

@@ -4,7 +4,7 @@ Working reference for Claude. `docs/CLAUDE.md` holds the hard rules, and this fi
 Last updated: 2026-10-04
 
 ## What it is
-Meet Spark is a Chrome extension (Manifest V3, v2.5.1) that adds engagement tools to Google Meet calls. It has no build step, because Chrome loads `extension/` directly. Clicking the **Spark** button (bottom-right) or pressing **Alt+S** opens a panel with four tabs:
+Meet Spark is a Chrome extension (Manifest V3, v2.5.2) that adds engagement tools to Google Meet calls. It has no build step, because Chrome loads `extension/` directly. Clicking the **Spark** button (bottom-right) or pressing **Alt+S** opens a panel with four tabs:
 
 1. **Icebreakers**: questions in 4 categories (Warm-up 10, Work 9, Fun 10, Reflective 7)
 2. **This or that** (`WYR`): 18 prompts
@@ -78,7 +78,7 @@ npm run package     # dist/meet-spark-<version>.zip
 - To fix selectors from a new report, use its `peopleLikeControls`, `dataAttrs`, `roles`, `regions` and `noTranslate` fields, then add a mock variant to `tests/markup-variants.test.js`.
 
 ## Guardrails (Layer 0.5, active)
-See `docs/GUARDRAILS.md` (GR-1…GR-16). `npm run verify`: check, lint (+ lint self-test), guard, 12 test files / 94 tests. `npm run mutate`: 70 mutants, all killed. Hooks: pre-commit, commit-msg (spec-first), pre-push (verify). Baseline tag: `v2.5.0-baseline`.
+See `docs/GUARDRAILS.md` (GR-1…GR-16). `npm run verify`: check, lint (+ lint self-test), guard, 12 test files / 97 tests. `npm run mutate`: 74 mutants, all killed. Hooks: pre-commit, commit-msg (spec-first), pre-push (verify). Baseline tag: `v2.5.0-baseline`.
 Browser tests can't download Chromium inside Cowork's sandbox on the Mac, so Claude runs them in the cloud workspace. On the Mac itself, `npm run setup` works normally.
 
 ## Current state (2026-10-04)
@@ -98,3 +98,4 @@ Every feature has a spec in `docs/specs/` (see the coverage map in `docs/GUARDRA
 - 2026-10-04: Mutation audit: only 1 of 7 planted mistakes was caught. Specs `guardrails-hardening.md` and `v2.5.1-fixes.md` written and approved.
 - 2026-10-04: Layer 0.5 guardrails (GR-12…GR-16, mutation gate, fingerprints, spec-first enforcement) and v2.5.1 fixes (F1, F2, N1–N8) implemented, plus 3 fixes from an independent review. 29/29 mutants killed.
 - 2026-10-04: Backfill specs for every feature approved and implemented (test-only): 40 new tests, IDs in every test name, 70/70 mutants killed, `docs/QA_CHECKLIST.md`.
+- 2026-10-05: v2.5.2: presenter names fixed (ROSTER-107…110), from a real-call bug report. 74/74 mutants killed.

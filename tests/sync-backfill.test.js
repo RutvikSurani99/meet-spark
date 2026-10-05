@@ -127,6 +127,42 @@ test("ROSTER-101 detected names are cleaned and Meet's own words are rejected", 
   await close();
 });
 
+test("ROSTER-107 status notes in brackets are stripped, even long or cut off; other brackets stay [ROSTER-110]", async () => {
+  const people = ["Rutvik Bharat", "Shourja Raj (Presenting, annotating)", "Asha Rao (You, presenting)", "Hamid Abdul (Host · Presenting)",
+    "Riya Sunil (Presenting, a", "Raj (Delhi office)", "Shourja Raj"];
+  const { page, close } = await openMeet({ browser, clock: true, body: panelPage({ people }) });
+  await tick(page, 9000);
+  assert.deepStrictEqual(await names(page), ["Asha Rao", "Hamid Abdul", "Raj (Delhi office)", "Riya Sunil", "Rutvik Bharat", "Shourja Raj"]);
+  await close();
+});
+
+test("ROSTER-109 Meet's presenting and tile control phrases are never names", async () => {
+  const junk = ["Zoom in", "Zoom out", "Reset zoom", "Fit to frame", "Fill frame", "You are presenting", "Stop presenting", "Present now",
+    "Presentation", "Full screen", "Exit full screen", "Backgrounds and effects"];
+  const { page, close } = await openMeet({ browser, clock: true, body: panelPage({ people: ["Rutvik Bharat", ...junk] }) });
+  await tick(page, 9000);
+  assert.deepStrictEqual(await names(page), ["Rutvik Bharat"]);
+  await close();
+});
+
+test("ROSTER-108 a presenter's tile adds only the presenter, never its controls (Zoom in) [ROSTER-110]", async () => {
+  // Like Meet while someone presents: the presenter's own tile, plus a presentation tile with a zoom button
+  // (tooltip "Zoom in"), a pop-out button whose tooltip isn't on any word list, and a full-screen button
+  // whose visible text comes before the name.
+  const body = `<body><button aria-label="Leave call">call_end</button>
+    <div data-participant-id="me"><span class="notranslate">Rutvik Bharat</span><div data-self-name="Rutvik Bharat"></div></div>
+    <div data-participant-id="sr"><span class="notranslate">Shourja Raj</span></div>
+    <div data-participant-id="pres"><button data-tooltip="Show in a new window"><i>open_in_new</i></button>
+      <button data-tooltip="Zoom in" aria-label="Zoom in"><i>zoom_in</i></button>
+      <div>Shourja Raj (Presenting, annotating)</div></div>
+    <div data-participant-id="pres2"><button>Full screen view</button><div>Shourja Raj (Presenting)</div></div></body>`;
+  const { page, close } = await openMeet({ browser, clock: true, body });
+  await tick(page, 10000);
+  assert.deepStrictEqual(await names(page), ["Rutvik Bharat", "Shourja Raj"]);
+  assert.strictEqual(await ui(page, (r) => r.querySelector("#navCount").textContent), "2");
+  await close();
+});
+
 test("ROSTER-103 avatars and names inside Spark's own panel are never read as people", async () => {
   const { page, close } = await openMeet({ browser, clock: true, body: `<body><button aria-label="Leave call">call_end</button></body>` });
   await ui(page, (r) => { const d = document.createElement("div"); d.innerHTML = '<img src="https://lh3.googleusercontent.com/a/x" width="32" height="32"><div>Ghost Person</div>'; r.querySelector(".content").appendChild(d); });

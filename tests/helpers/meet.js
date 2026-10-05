@@ -78,7 +78,7 @@ async function openMeet({ body = DEFAULT_BODY, csp, browser, url = MEET_URL, clo
   for (const fn of init) await page.addInitScript(fn);
   if (clock) await page.clock.install();
   await page.route("https://meet.google.com/**", (r) =>
-    r.fulfill({ contentType: "text/html", headers: csp ? { "content-security-policy": csp } : {}, body }));
+    r.fulfill({ contentType: "text/html; charset=utf-8", headers: csp ? { "content-security-policy": csp } : {}, body }));
   await page.route("**/*googleusercontent.com/**", (r) => r.fulfill({ status: 200, contentType: "image/png", body: "" }));
   await page.goto(url);
   const doInject = async () => {

@@ -798,6 +798,50 @@
         "features.test.js",
         "ui-backfill.test.js"
       ]
+    },
+    {
+      "id": "ROSTER-107",
+      "spec": "ROSTER-107",
+      "desc": "only exact one-word status notes are stripped again ('(Presenting, annotating)' survives)",
+      "file": "extension/content.js",
+      "find": "const STATUS_NOTE = /\\s*\\((?:you|presenting|presentation|host|meeting host|co-host)\\b[^)]*(?:\\)|$)/gi;",
+      "replace": "const STATUS_NOTE = /\\s*\\((?:you|presenting|presentation|host|meeting host|co-host)\\)\\s*/gi;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "ROSTER-108a",
+      "spec": "ROSTER-108",
+      "desc": "button tooltips are read as names again ('Zoom in')",
+      "file": "extension/content.js",
+      "find": "        if (inControl(c)) continue; // ROSTER-108\n",
+      "replace": "        if (inControl(c) && !c.isConnected) continue; // ROSTER-108\n",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "ROSTER-108b",
+      "spec": "ROSTER-108",
+      "desc": "visible button text is read as a name again",
+      "file": "extension/content.js",
+      "find": ".filter((x) => x && !controlText.has(x.toLowerCase()));",
+      "replace": ".filter((x) => x && !controlText.has(x.toLowerCase().slice(0, 0)));",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
+    },
+    {
+      "id": "ROSTER-109",
+      "spec": "ROSTER-109",
+      "desc": "presenting/tile control phrases are no longer rejected",
+      "file": "extension/content.js",
+      "find": "|zoom in|zoom out|reset zoom|fit to frame|fill frame|you are presenting|stop presenting|present now|full screen|exit full screen|backgrounds and effects)$/i;",
+      "replace": ")$/i;",
+      "killedBy": [
+        "sync-backfill.test.js"
+      ]
     }
   ]
 }

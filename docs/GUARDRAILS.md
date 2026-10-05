@@ -66,7 +66,7 @@ Every behaviour has a requirement ID in a spec, a test whose **name** carries th
 | Speakers: list and picker | `docs/specs/speakers.md` | SPK-001…016 | features, ui-backfill |
 | Copy to chat | `docs/specs/copy-to-chat.md` | COPY-001…006 | ui-backfill |
 | Auto-sync and manual sync | `docs/specs/sync.md`, `docs/specs/v2.5.1-fixes.md` | SYNC-101…108, SYNC-001…004 | sync-backfill, sync-roster, roster-sync, remove-clear-sync |
-| Roster and detection | `docs/specs/roster-and-detection.md`, `docs/specs/v2.5.1-fixes.md` | ROSTER-101…106, ROSTER-001…004, DETECT-001 | sync-backfill, sync-roster, markup-variants, features |
+| Roster and detection | `docs/specs/roster-and-detection.md`, `docs/specs/v2.5.1-fixes.md` | ROSTER-101…110, ROSTER-001…004, DETECT-001 | sync-backfill, sync-roster, markup-variants, features |
 | Safety (clicks into Meet) | `docs/specs/v2.5.1-fixes.md`, `docs/specs/guardrails-hardening.md` | SAFE-001…004, GRH-030…033 | safety (+ click recorder in every browser test) |
 | Diagnose | `docs/specs/diagnose.md`, `docs/specs/v2.5.1-fixes.md` | DIAG-101…104, DIAG-001 | ui-backfill, keys-diag, features, safety |
 | Content | (GR-7) | CONTENT-1 | content-policy |

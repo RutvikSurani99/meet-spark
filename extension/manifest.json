@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Meet Spark – Icebreakers & Games",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Icebreakers, This or That, Meeting Bingo and a speaker picker that auto-syncs participants right inside Google Meet.",
   "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
   "content_scripts": [
