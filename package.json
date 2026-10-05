@@ -1,6 +1,6 @@
 {
   "name": "meet-spark",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "private": true,
   "description": "Chrome extension that adds icebreakers, This or That, Meeting Bingo and a speaker picker to Google Meet.",
   "scripts": {

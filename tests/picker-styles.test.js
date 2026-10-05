@@ -101,6 +101,58 @@ test("PSTY-004 PSTY-018 Surprise me never repeats a style twice in a row; Pick a
   await close();
 });
 
+// Plays n more Surprise me picks with Pick again (the first one with the Pick button) and returns their styles.
+async function surprisePicks(page, n, { fresh = false } = {}) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    await click(page, fresh && i === 0 ? "#pickBtn" : "#pstyAgain");
+    out.push((await state(page)).style);
+    await tick(page, 5000);
+  }
+  return out;
+}
+
+test("PSTY-006 Surprise me shows all six styles once before going random, per meeting, and survives a reload", async () => {
+  // First six picks: six different styles. After that: random, never the same twice in a row.
+  const a = await setup({ n: 4, random: true });
+  const first = await surprisePicks(a.page, 6, { fresh: true });
+  assert.deepStrictEqual([...first].sort(), [...STYLES].sort(), `first six: ${first}`);
+  const more = await surprisePicks(a.page, 4);
+  [first[5], ...more].forEach((x, i, arr) => { if (i) assert.notStrictEqual(x, arr[i - 1], "repeat after the tour"); });
+  assert.strictEqual((await storage(a.page, "styleSeen:abc-defg-hij")).length, 6);
+  await a.close();
+
+  // Reload after three picks: the next three are the missing three.
+  const b = await setup({ n: 4, random: true });
+  const three = await surprisePicks(b.page, 3, { fresh: true });
+  const saved = await storage(b.page, "styleSeen:abc-defg-hij");
+  assert.deepStrictEqual([...saved].sort(), [...three].sort());
+  await b.close();
+  const seed = new Function(`localStorage.setItem("meetSpark:styleSeen:abc-defg-hij", ${JSON.stringify(JSON.stringify(saved))});`);
+  const c = await setup({ n: 4, random: true, init: [seed] });
+  const rest = await surprisePicks(c.page, 3, { fresh: true });
+  assert.deepStrictEqual([...three, ...rest].sort(), [...STYLES].sort(), `after reload: ${three} then ${rest}`);
+  await c.close();
+
+  // A fixed style counts as shown; unknown saved values are ignored.
+  const junk = () => localStorage.setItem("meetSpark:styleSeen:abc-defg-hij", JSON.stringify(["bogus", 7]));
+  const d = await setup({ n: 4, random: true, style: "wheel", init: [junk] });
+  await click(d.page, "#pickBtn"); await tick(d.page, 5000); await click(d.page, "#pstyDone");
+  await setStyle(d.page, "surprise");
+  const five = await surprisePicks(d.page, 5, { fresh: true });
+  assert.deepStrictEqual([...five].sort(), STYLES.filter((x) => x !== "wheel").sort(), `after a fixed Wheel pick: ${five}`);
+  assert.deepStrictEqual([...(await storage(d.page, "styleSeen:abc-defg-hij"))].sort(), [...STYLES].sort());
+
+  // Another meeting starts its own tour.
+  await click(d.page, "#pstyDone");
+  await d.page.evaluate(() => history.pushState({}, "", "/xyz-abcd-efg"));
+  await tick(d.page, 2600);
+  await ui(d.page, (r) => { for (const v of ["Asha Rao", "Priya Nair"]) { r.querySelector("#addName").value = v; r.querySelector("#addBtn").click(); } });
+  const other = await surprisePicks(d.page, 1, { fresh: true });
+  assert.deepStrictEqual(await storage(d.page, "styleSeen:xyz-abcd-efg"), other, "the new meeting did not start fresh");
+  await d.close();
+});
+
 // ---------------- The popup ----------------
 test("PSTY-010 PSTY-011 PSTY-015 PSTY-019 the popup reveals the already-chosen winner with confetti; Done shows them in the panel", async () => {
   const { page, close } = await setup({ n: 3, style: "slot" });

@@ -5,6 +5,12 @@ Every entry names the spec requirement IDs it implements (see `docs/specs/`).
 
 ## [Unreleased]
 
+## [2.6.1] — 2026-10-05
+Spec: `docs/specs/picker-styles.md` v2.
+
+### Changed
+- **Surprise me** now shows all six animations once in each meeting before going random (still never the same one twice in a row). Fixed-style picks, Pick again and Skip count as shown; progress is saved per meeting, so a reload doesn't restart it (PSTY-006).
+
 ## [2.6.0] — 2026-10-05
 Spec: `docs/specs/picker-styles.md` v1.
 

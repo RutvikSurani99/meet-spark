@@ -552,6 +552,7 @@
     roster.lastFullSync = 0; roster.lastSyncCount = undefined;
     syncPaused = false; joinedAt = 0;
     loadSpoken();
+    loadStyleSeen(); // PSTY-006: each meeting has its own six-style tour
     renderPeople();
     return true;
   }
@@ -1311,7 +1312,19 @@
     return out;
   };
   // PSTY-003 / PSTY-004: a fixed style, or a random one that never repeats the previous pick's style.
-  const nextStyle = () => (pickStyle !== "surprise" ? pickStyle : pick(PSTY_STYLES.filter((s) => s !== pop.last)));
+  // PSTY-006: styles already shown in this meeting. Surprise me shows every style once before going random.
+  let styleSeen = new Set();
+  function loadStyleSeen() {
+    const v = currentMeeting ? store.get(`styleSeen:${currentMeeting}`, []) : [];
+    styleSeen = new Set(Array.isArray(v) ? v.filter((x) => PSTY_STYLES.includes(x)) : []);
+  }
+  loadStyleSeen();
+  const markStyleSeen = (style) => { styleSeen.add(style); if (currentMeeting) store.set(`styleSeen:${currentMeeting}`, [...styleSeen]); };
+  const nextStyle = () => {
+    if (pickStyle !== "surprise") return pickStyle;
+    const unseen = PSTY_STYLES.filter((x) => !styleSeen.has(x) && x !== pop.last);
+    return pick(unseen.length ? unseen : PSTY_STYLES.filter((x) => x !== pop.last));
+  };
 
   // Each renderer draws its animation into the stage, schedules it with popLater() and returns
   // { ms: time until the reveal (≤ 5000, PSTY-012), head: reveal headline, avatar?: false, reveal?: fn }.
@@ -1437,6 +1450,7 @@
   function openPicker(winner, active) { // PSTY-010
     popStop();
     const style = nextStyle();
+    markStyleSeen(style); // PSTY-006
     Object.assign(pop, { style, last: style, winner, revealed: false });
     if (!pop.open) { pop.open = true; pop.inCall = inCall(); $("#psty").hidden = false; }
     $("#pickBtn").disabled = true;

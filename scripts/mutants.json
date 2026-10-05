@@ -859,8 +859,8 @@
       "spec": "PSTY-003",
       "desc": "A fixed style is ignored (always random)",
       "file": "extension/content.js",
-      "find": "pickStyle !== \"surprise\" ? pickStyle :",
-      "replace": "pickStyle === \"never\" ? pickStyle :",
+      "find": "if (pickStyle !== \"surprise\") return pickStyle;",
+      "replace": "if (pickStyle === \"never\") return pickStyle;",
       "killedBy": [
         "picker-styles.test.js"
       ]
@@ -870,8 +870,8 @@
       "spec": "PSTY-004",
       "desc": "Surprise me may repeat the previous style",
       "file": "extension/content.js",
-      "find": "PSTY_STYLES.filter((s) => s !== pop.last)",
-      "replace": "PSTY_STYLES.filter(Boolean)",
+      "find": "return pick(unseen.length ? unseen : PSTY_STYLES.filter((x) => x !== pop.last));",
+      "replace": "return pick(unseen.length ? unseen : PSTY_STYLES.filter(Boolean));",
       "killedBy": [
         "picker-styles.test.js"
       ]
@@ -1103,6 +1103,50 @@
       "file": "extension/content.js",
       "find": "const done = t >= (r ? 16 : 6) + i * 2;",
       "replace": "const done = t >= (r ? 16 : 6) + i * 3;",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-006",
+      "spec": "PSTY-006",
+      "desc": "Surprise me ignores which styles were already shown",
+      "file": "extension/content.js",
+      "find": "const unseen = PSTY_STYLES.filter((x) => !styleSeen.has(x) && x !== pop.last);",
+      "replace": "const unseen = [];",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-006b",
+      "spec": "PSTY-006",
+      "desc": "Shown styles are not saved for the meeting",
+      "file": "extension/content.js",
+      "find": "if (currentMeeting) store.set(`styleSeen:${currentMeeting}`, [...styleSeen]);",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-006c",
+      "spec": "PSTY-006",
+      "desc": "A played style is not counted as shown",
+      "file": "extension/content.js",
+      "find": "    markStyleSeen(style); // PSTY-006\n",
+      "replace": "    markStyleSeen(pop.never); // PSTY-006\n",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-006d",
+      "spec": "PSTY-006",
+      "desc": "A new meeting keeps the old meeting's tour",
+      "file": "extension/content.js",
+      "find": "    loadStyleSeen(); // PSTY-006: each meeting has its own six-style tour\n",
+      "replace": "",
       "killedBy": [
         "picker-styles.test.js"
       ]
