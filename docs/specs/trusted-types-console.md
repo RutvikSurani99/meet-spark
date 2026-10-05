@@ -1,5 +1,5 @@
 # Trusted Types fallback console message — Spec
-ID prefix: TTC · Status: **Approved** (2026-10-05, Rutvik) · Version: 1 · Owner: Rutvik Bharat
+ID prefix: TTC · Status: **Implemented** (2026-10-05) · Approved 2026-10-05 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Bug fix. Related: `docs/specs/launcher-and-panel.md` (LAUNCH-009, GR-3).
 
 ## Problem / goal
@@ -58,3 +58,4 @@ None. No visible change.
 ## Changelog
 - 2026-10-05 v1: Draft. Root cause found: Chromium 1243 changed the wording of the blocked-policy console message. The test allowlist only knew the old wording.
 - 2026-10-05 v1: Approved by Rutvik (option A, recommended answers to all open questions).
+- 2026-10-05 v1: Implemented. Tests TTC-001, TTC-002 in `tests/tt-console.test.js`; mutants M-TTC-1, M-TTC-2 killed by tests (117/117). verify: 14 files / 122 tests.
