@@ -1,5 +1,5 @@
 # Picker styles: animated popup for "Pick next speaker" — Spec
-ID prefix: PSTY · Status: **Implemented** (2026-10-05, v2.6.0) · Approved 2026-10-05 by Rutvik · Version: 1 · Owner: Rutvik Bharat
+ID prefix: PSTY · Status: **Approved** (v2 amendment PSTY-006 approved 2026-10-05 by Rutvik; PSTY-001…035 Implemented 2026-10-05 in v2.6.0) · Version: 2 · Owner: Rutvik Bharat
 Amends `docs/specs/speakers.md` (SPK-014 timing). Who can be picked is unchanged: SPK-010…SPK-013 still decide the winner.
 
 ## Problem / goal
@@ -20,6 +20,7 @@ Design reference: the "Speaker Picker Concepts" design canvas (boards 1–6, 1b,
 | PSTY-002 | MUST remember the choice in this browser (`meetSpark:pickStyle`, not per meeting); an unknown value falls back to Surprise me | Choose Wheel → reload → Wheel; stored "disco" → Surprise me | e2e |
 | PSTY-003 | MUST, with a fixed style chosen, use that style for every pick | Wheel chosen → 3 picks all show the wheel | e2e |
 | PSTY-004 | MUST, with **Surprise me**, use a random style for each pick, never the same style twice in a row | 12 picks → no two neighbours share a style; at least 3 different styles seen | e2e |
+| PSTY-006 | MUST, with **Surprise me**, show every one of the six styles once before any style comes back: the first six picks of a meeting use the six styles in random order; after that, picks are random as in PSTY-004 (still never the same twice in a row). A style counts as shown whenever its popup plays, including fixed-style picks, **Pick again** and **Skip**. The shown set is saved per meeting (`meetSpark:styleSeen:<meeting>`) so a page reload doesn't restart it, and kept in memory only outside a meeting (like ROSTER-002); an invalid saved value counts as nothing shown | Surprise me, 6 picks → 6 different styles; 7th pick ≠ 6th; reload after 3 picks → next 3 picks are the 3 missing styles; Wheel used as a fixed style, then Surprise me → the next 5 picks are the other 5 styles; another meeting starts fresh | e2e |
 | PSTY-005 | SHOULD show the style's name small at the top of the popup (e.g. "Slot machine") so people learn the names | Popup shows "Wheel" label | e2e |
 
 ## Behaviour: the popup
@@ -84,7 +85,13 @@ Shared: the popup is ~640×560 px (shrinks to fit small windows), dark backdrop,
 3. Fixed style: **all six available**, including the wheel's longer 4.8 s.
 4. Popup on small windows: **scale down to fit**, never scroll.
 
+## Decisions for v2 (accepted 2026-10-05)
+1. The six-style tour runs **once per meeting**, then random for the rest of that meeting (not a repeating cycle).
+2. **Reset** (speakers round) does **not** restart the tour.
+
 ## Changelog
 - 2026-10-05 v1: Draft.
 - 2026-10-05 v1: Approved by Rutvik (all proposed answers accepted).
 - 2026-10-05 v1: Implemented in v2.6.0. Tests in `tests/picker-styles.test.js` carry the IDs; mutants M-PSTY-… in `scripts/mutants.json`. Note: PSTY-021's early return in `pickSpeaker()` has no mutant, because the disabled Pick button already blocks a second pick (COV-P21 covers that).
+- 2026-10-05 v2: Draft amendment PSTY-006 (Surprise me shows all six styles once before going random), requested by Rutvik.
+- 2026-10-05 v2: Approved by Rutvik (both proposed answers accepted).
