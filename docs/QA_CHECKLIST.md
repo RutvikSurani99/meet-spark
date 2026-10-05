@@ -16,5 +16,7 @@ Setup: load the unpacked `extension/` folder in Chrome (`docs/README.md`), join 
 | 8 | Copy an icebreaker, a This-or-that prompt and the Bingo invite into Meet's chat | Each pastes the expected text | COPY-003…005 |
 | 9 | As host, check Meet's host controls after a few syncs | Nothing was toggled (chat, mic, captions, access settings unchanged) | GR-2, SAFE-001 |
 | 10 | Move to another meeting without reloading | The new meeting starts with an empty list; going back restores the old one | ROSTER-001 |
+| 11 | Pick next speaker with each Animation style, then with Surprise me a few times | Popup over the call, lands on the name shown, confetti; Surprise me changes style every time | PSTY-003, PSTY-004, PSTY-030…035 |
+| 12 | Share your screen or tab and pick | The popup appears in what you share (only the extension draws it); Done closes it and the panel shows the name | PSTY-019, non-goal note |
 
 If anything fails, run **Diagnose** in that call and start a spec (`/spec` or `npm run spec:new`) with the report attached.

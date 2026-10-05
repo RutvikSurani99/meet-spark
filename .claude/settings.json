@@ -46,6 +46,8 @@
       "Write(./tests/safety.test.js)",
       "Edit(./tests/trusted-types.test.js)",
       "Write(./tests/trusted-types.test.js)",
+      "Edit(./tests/picker-styles.test.js)",
+      "Write(./tests/picker-styles.test.js)",
       "Edit(./.githooks/pre-commit)",
       "Write(./.githooks/pre-commit)",
       "Edit(./.githooks/commit-msg)",

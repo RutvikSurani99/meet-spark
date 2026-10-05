@@ -5,6 +5,22 @@ Every entry names the spec requirement IDs it implements (see `docs/specs/`).
 
 ## [Unreleased]
 
+## [2.6.0] — 2026-10-05
+Spec: `docs/specs/picker-styles.md` v1.
+
+### Added
+- **Pick next speaker** opens a big popup over the call with one of six animations: Slot machine, Wheel, Spotlight, Cards, Departure board and Countdown, then celebrates the winner with confetti (coins for the slot machine) (PSTY-010, PSTY-015, PSTY-030…035).
+- New **Animation** setting in the Speakers tab: pick one style, or **Surprise me** (default), which uses a different style every pick and never repeats one twice in a row. Remembered in this browser (PSTY-001…005).
+- Popup buttons **Skip, not here** (not counted as spoken, lands on someone else), **Pick again** and **Done**, plus ✕ and Esc (PSTY-016…019).
+- Works the same for 1 to 300 people: every animation ends within 5 s and stays small (slot reels ≤ 40 rows, wheel ≤ 12 names, spotlight ≤ 200 faces, always including the winner). In Everyone once, only people still to speak appear (PSTY-012…014).
+- Reduce-motion support, keyboard focus handling and a screen-reader announcement (PSTY-022, PSTY-023).
+
+### Changed
+- The Pick button stays disabled while the popup is open (SPK-014 amended by PSTY-021). The Icebreakers **Ask** button stays instant (PSTY-027).
+
+### Tests
+- New `tests/picker-styles.test.js` (17 tests); SPK-014 and SPK-7 tests updated to close the popup. 24 new mutants (M-PSTY-…), all killed.
+
 ## [2.5.2] — 2026-10-05
 Spec: `docs/specs/roster-and-detection.md` v2.
 

@@ -303,7 +303,7 @@ async function test(name, fn) {
       await ui(page, (r) => r.querySelector('#people .person[data-n="Vikram Singh"] .rm').click()); // remove
       await click(page, '#mode [data-m="random"]');
       const seen = new Set();
-      for (let i = 0; i < 30; i++) { await click(page, "#pickBtn"); await tick(page, 6000); seen.add(await text(page, "#pickedName")); }
+      for (let i = 0; i < 30; i++) { await click(page, "#pickBtn"); await tick(page, 6000); seen.add(await text(page, "#pickedName")); await click(page, "#pstyDone"); } // close the popup (PSTY-019)
       assert.ok(!seen.has("Meera Iyer") && !seen.has("Vikram Singh"), `picked ${[...seen]}`);
       assert.deepStrictEqual([...seen].sort(), ["Asha Rao", "Priya Nair"]);
       await context.close();

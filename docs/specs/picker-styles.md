@@ -1,5 +1,5 @@
 # Picker styles: animated popup for "Pick next speaker" — Spec
-ID prefix: PSTY · Status: **Approved** (2026-10-05) · Approved 2026-10-05 by Rutvik · Version: 1 · Owner: Rutvik Bharat
+ID prefix: PSTY · Status: **Implemented** (2026-10-05, v2.6.0) · Approved 2026-10-05 by Rutvik · Version: 1 · Owner: Rutvik Bharat
 Amends `docs/specs/speakers.md` (SPK-014 timing). Who can be picked is unchanged: SPK-010…SPK-013 still decide the winner.
 
 ## Problem / goal
@@ -87,3 +87,4 @@ Shared: the popup is ~640×560 px (shrinks to fit small windows), dark backdrop,
 ## Changelog
 - 2026-10-05 v1: Draft.
 - 2026-10-05 v1: Approved by Rutvik (all proposed answers accepted).
+- 2026-10-05 v1: Implemented in v2.6.0. Tests in `tests/picker-styles.test.js` carry the IDs; mutants M-PSTY-… in `scripts/mutants.json`. Note: PSTY-021's early return in `pickSpeaker()` has no mutant, because the disabled Pick button already blocks a second pick (COV-P21 covers that).

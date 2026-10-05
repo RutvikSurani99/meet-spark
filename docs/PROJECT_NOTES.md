@@ -4,12 +4,12 @@ Working reference for Claude. `docs/CLAUDE.md` holds the hard rules, and this fi
 Last updated: 2026-10-04
 
 ## What it is
-Meet Spark is a Chrome extension (Manifest V3, v2.5.2) that adds engagement tools to Google Meet calls. It has no build step, because Chrome loads `extension/` directly. Clicking the **Spark** button (bottom-right) or pressing **Alt+S** opens a panel with four tabs:
+Meet Spark is a Chrome extension (Manifest V3, v2.6.0) that adds engagement tools to Google Meet calls. It has no build step, because Chrome loads `extension/` directly. Clicking the **Spark** button (bottom-right) or pressing **Alt+S** opens a panel with four tabs:
 
 1. **Icebreakers**: questions in 4 categories (Warm-up 10, Work 9, Fun 10, Reflective 7)
 2. **This or that** (`WYR`): 18 prompts
 3. **Meeting Bingo** (`BINGO`): 30 squares
-4. **Speakers**: a random speaker picker that uses an auto-synced participant roster
+4. **Speakers**: a random speaker picker that uses an auto-synced participant roster. Picks play in a popup with six animation styles, or Surprise me (`docs/specs/picker-styles.md`)
 
 The content is written for Indian teams (chai, cricket, festivals, trains, monsoon, "Am I audible?"). It avoids religion, politics, caste and region-vs-region comparisons.
 
@@ -17,7 +17,7 @@ The content is written for Indian teams (chai, cricket, festivals, trains, monso
 ```
 extension/
   manifest.json        MV3; content script on https://meet.google.com/*, run_at document_idle
-  content.js           ~1200 lines, all logic + UI (wrapped in one IIFE)
+  content.js           ~1560 lines, all logic + UI (wrapped in one IIFE)
   icons/               16 / 48 / 128 px
 tests/                 Playwright tests against mock Meet pages (fake clock; no real waits)
   run.js               runs every *.test.js; a file must print "PASS <name> (N tests)" with N > 0
@@ -28,6 +28,7 @@ tests/                 Playwright tests against mock Meet pages (fake clock; no 
   safety.test.js       trap page, People-button table, safe group expand, safe undo
   sync-roster.test.js  SYNC-*, ROSTER-* (v2.5.1)
   keys-diag.test.js    KEYS-001, DIAG-001
+  picker-styles.test.js PSTY-* picker popup and animation styles
   roster-sync / remove-clear-sync / markup-variants / trusted-types / content-policy / lint-bypass
 scripts/
   guard.js             repo invariants (see docs/GUARDRAILS.md); --relock after an approved protected-file change
@@ -78,7 +79,7 @@ npm run package     # dist/meet-spark-<version>.zip
 - To fix selectors from a new report, use its `peopleLikeControls`, `dataAttrs`, `roles`, `regions` and `noTranslate` fields, then add a mock variant to `tests/markup-variants.test.js`.
 
 ## Guardrails (Layer 0.5, active)
-See `docs/GUARDRAILS.md` (GR-1…GR-16). `npm run verify`: check, lint (+ lint self-test), guard, 12 test files / 97 tests. `npm run mutate`: 74 mutants, all killed. Hooks: pre-commit, commit-msg (spec-first), pre-push (verify). Baseline tag: `v2.5.0-baseline`.
+See `docs/GUARDRAILS.md` (GR-1…GR-16). `npm run verify`: check, lint (+ lint self-test), guard, 13 test files / 114 tests. `npm run mutate`: 98 mutants, all killed. Hooks: pre-commit, commit-msg (spec-first), pre-push (verify). Baseline tag: `v2.5.0-baseline`.
 Browser tests can't download Chromium inside Cowork's sandbox on the Mac, so Claude runs them in the cloud workspace. On the Mac itself, `npm run setup` works normally.
 
 ## Current state (2026-10-04)
@@ -99,3 +100,4 @@ Every feature has a spec in `docs/specs/` (see the coverage map in `docs/GUARDRA
 - 2026-10-04: Layer 0.5 guardrails (GR-12…GR-16, mutation gate, fingerprints, spec-first enforcement) and v2.5.1 fixes (F1, F2, N1–N8) implemented, plus 3 fixes from an independent review. 29/29 mutants killed.
 - 2026-10-04: Backfill specs for every feature approved and implemented (test-only): 40 new tests, IDs in every test name, 70/70 mutants killed, `docs/QA_CHECKLIST.md`.
 - 2026-10-05: v2.5.2: presenter names fixed (ROSTER-107…110), from a real-call bug report. 74/74 mutants killed.
+- 2026-10-05: v2.6.0: picker popup with six animation styles and Surprise me (PSTY-001…035), designed on the "Speaker Picker Concepts" canvas and built for 100+ people. 98/98 mutants killed.

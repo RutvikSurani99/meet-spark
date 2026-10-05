@@ -223,12 +223,15 @@ test("SPK-012 Fully random shows '<n> in the draw'", async () => {
   await close();
 });
 
-test("SPK-014 the Pick button is disabled during the animation", async () => {
+// SPK-014 as amended by picker-styles PSTY-021: disabled while the pick popup is open, enabled after Done.
+test("SPK-014 PSTY-021 the Pick button is disabled while the pick popup is open", async () => {
   const { page, close } = await openMeet({ browser, clock: true });
   await addName(page, "Asha Rao"); await addName(page, "Priya Nair");
   await click(page, "#pickBtn");
   assert.strictEqual(await prop(page, "#pickBtn", "disabled"), true);
   await tick(page, 6000);
+  assert.strictEqual(await prop(page, "#pickBtn", "disabled"), true, "still disabled: the popup is open");
+  await click(page, "#pstyDone");
   assert.strictEqual(await prop(page, "#pickBtn", "disabled"), false);
   await close();
 });

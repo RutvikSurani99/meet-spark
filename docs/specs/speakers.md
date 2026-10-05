@@ -47,4 +47,5 @@ Names are stored only in this browser (`localStorage`, `meetSpark:` keys). Nothi
 ## Changelog
 - 2026-10-04 v1: Draft (backfill).
 - 2026-10-04 v1: Approved by Rutvik (all ten backfill specs together; current behaviour kept for every open question).
+- 2026-10-05: SPK-014 amended by `docs/specs/picker-styles.md` PSTY-021: the pick now plays in a popup (≤ 5 s, style-dependent) and the Pick button stays disabled until the popup closes.
 - 2026-10-04 v1: Implemented. Tests carry the requirement IDs in their names; mutants in `scripts/mutants.json` (COV-Pnn).

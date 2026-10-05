@@ -842,6 +842,270 @@
       "killedBy": [
         "sync-backfill.test.js"
       ]
+    },
+    {
+      "id": "M-PSTY-002",
+      "spec": "PSTY-002",
+      "desc": "An unknown stored style is kept instead of falling back to Surprise me",
+      "file": "extension/content.js",
+      "find": "if (pickStyle !== \"surprise\" && !PSTY_STYLES.includes(pickStyle)) pickStyle = \"surprise\"; // PSTY-002",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-003",
+      "spec": "PSTY-003",
+      "desc": "A fixed style is ignored (always random)",
+      "file": "extension/content.js",
+      "find": "pickStyle !== \"surprise\" ? pickStyle :",
+      "replace": "pickStyle === \"never\" ? pickStyle :",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-004",
+      "spec": "PSTY-004",
+      "desc": "Surprise me may repeat the previous style",
+      "file": "extension/content.js",
+      "find": "PSTY_STYLES.filter((s) => s !== pop.last)",
+      "replace": "PSTY_STYLES.filter(Boolean)",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-005",
+      "spec": "PSTY-005",
+      "desc": "The style name is not shown",
+      "file": "extension/content.js",
+      "find": "$(\"#pstyStyle\").textContent = PSTY[style];",
+      "replace": "$(\"#pstyStyle\").textContent = style;",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-011",
+      "spec": "PSTY-011",
+      "desc": "Slot reels don’t end on the winner",
+      "file": "extension/content.js",
+      "find": "a.push(w, pick(draw));",
+      "replace": "a.push(pick(draw), pick(draw));",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-012",
+      "spec": "PSTY-012",
+      "desc": "The wheel takes longer than 5 s",
+      "file": "extension/content.js",
+      "find": "return { ms: start + 4100,",
+      "replace": "return { ms: start + 5100,",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-013",
+      "spec": "PSTY-013",
+      "desc": "The wheel shows everyone instead of a 12-name shortlist",
+      "file": "extension/content.js",
+      "find": "const slots = big ? sampleWith(draw, 12, w) : shuffle(draw);",
+      "replace": "const slots = big ? draw : shuffle(draw);",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-013b",
+      "spec": "PSTY-013",
+      "desc": "The spotlight shows everyone instead of at most 200",
+      "file": "extension/content.js",
+      "find": "const faces = draw.length > 200 ? sampleWith(draw, 200, w) : draw;",
+      "replace": "const faces = draw;",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-014",
+      "spec": "PSTY-014",
+      "desc": "Everyone once shows people who already spoke",
+      "file": "extension/content.js",
+      "find": "const draw = mode === \"round\" ? active.filter((n) => n === winner || !spoken.has(n)) : active;",
+      "replace": "const draw = active;",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-015",
+      "spec": "PSTY-015",
+      "desc": "No coins for the slot machine",
+      "file": "extension/content.js",
+      "find": "if (!still) confetti(pop.style === \"slot\");",
+      "replace": "if (!still) confetti(pop.style === \"never\");",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-016",
+      "spec": "PSTY-016",
+      "desc": "Esc doesn’t close the popup",
+      "file": "extension/content.js",
+      "find": "if (e.key === \"Escape\") { e.preventDefault(); closePicker(); return; }",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-017",
+      "spec": "PSTY-017",
+      "desc": "Skip counts the skipped person as spoken",
+      "file": "extension/content.js",
+      "find": "spoken.delete(w); saveSpoken();\n    pickSpeaker({ avoid: w });",
+      "replace": "pickSpeaker({ avoid: w });",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-017b",
+      "spec": "PSTY-017",
+      "desc": "Skip may land on the skipped person again",
+      "file": "extension/content.js",
+      "find": "active.filter((n) => n !== avoid)",
+      "replace": "active.filter((n) => n !== avoid || n)",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-019",
+      "spec": "PSTY-019",
+      "desc": "Done doesn’t close the popup",
+      "file": "extension/content.js",
+      "find": "$(\"#pstyDone\").addEventListener(\"click\", () => closePicker());",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-020",
+      "spec": "PSTY-020",
+      "desc": "Closing mid-animation loses the pick",
+      "file": "extension/content.js",
+      "find": "if (keep && !pop.revealed) markPicked(pop.winner);",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-020b",
+      "spec": "PSTY-020",
+      "desc": "Closing mid-animation leaves timers running",
+      "file": "extension/content.js",
+      "find": "    popStop();\n    if (keep && !pop.revealed)",
+      "replace": "    if (keep && !pop.revealed)",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-022",
+      "spec": "PSTY-022",
+      "desc": "Reduced motion is ignored",
+      "file": "extension/content.js",
+      "find": "if (reducedMotion()) { revealPicker(",
+      "replace": "if (reducedMotion() && pop.never) { revealPicker(",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-023",
+      "spec": "PSTY-023",
+      "desc": "Focus doesn’t return to the Pick button",
+      "file": "extension/content.js",
+      "find": "if (keep) $(\"#pickBtn\").focus(); // PSTY-023",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-023b",
+      "spec": "PSTY-023",
+      "desc": "Tab escapes the popup",
+      "file": "extension/content.js",
+      "find": "else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-024",
+      "spec": "PSTY-024",
+      "desc": "The card face renders the name as HTML",
+      "file": "extension/content.js",
+      "find": "<b data-n=\"${esc(w)}\">${esc(w)}</b>",
+      "replace": "<b data-n=\"${esc(w)}\">${w}</b>",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-025",
+      "spec": "PSTY-025",
+      "desc": "Keys inside the popup reach Meet",
+      "file": "extension/content.js",
+      "find": "$(\"#pstyDlg\").addEventListener(\"keydown\", (e) => {\n    e.stopPropagation();",
+      "replace": "$(\"#pstyDlg\").addEventListener(\"keydown\", (e) => {",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-026",
+      "spec": "PSTY-026",
+      "desc": "Leaving the call leaves the popup open",
+      "file": "extension/content.js",
+      "find": "if (!inCall()) { pickerLeft(); joinedAt = 0;",
+      "replace": "if (!inCall()) { joinedAt = 0;",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-026b",
+      "spec": "PSTY-026",
+      "desc": "Switching meeting leaves the popup open",
+      "file": "extension/content.js",
+      "find": "    pickerLeft({ meetingChanged: true }); // PSTY-026\n",
+      "replace": "",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
+    },
+    {
+      "id": "M-PSTY-034",
+      "spec": "PSTY-034",
+      "desc": "Board letters never all settle",
+      "file": "extension/content.js",
+      "find": "const done = t >= (r ? 16 : 6) + i * 2;",
+      "replace": "const done = t >= (r ? 16 : 6) + i * 3;",
+      "killedBy": [
+        "picker-styles.test.js"
+      ]
     }
   ]
 }

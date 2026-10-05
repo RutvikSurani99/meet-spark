@@ -544,6 +544,7 @@
     const id = meetingId();
     if (id === currentMeeting) return false;
     log("meeting changed:", currentMeeting ? "<meeting>" : "none", "→", id ? "<meeting>" : "none");
+    pickerLeft({ meetingChanged: true }); // PSTY-026
     currentMeeting = id;
     roster.live.clear(); roster.dismissed.clear();
     roster.manual = new Set(id ? validNames(store.get(`manual:${id}`, [])) : []);
@@ -679,7 +680,7 @@
   // Passive watcher: reads tiles/panel continuously, triggers a full sync when the headcount changes.
   setInterval(() => {
     checkMeeting(); // ROSTER-001
-    if (!inCall()) { joinedAt = 0; updateCount(); return; }
+    if (!inCall()) { pickerLeft(); joinedAt = 0; updateCount(); return; } // PSTY-026
     if (!joinedAt) joinedAt = Date.now();
     watcherStats.ticks++;
     if (syncing) { watcherStats.skippedDuringSync++; return; } // SYNC-003: never read a list mid-sync
@@ -849,6 +850,122 @@
   .snackbar.show { opacity: 1; transform: translate(-50%, 0); }
   .burst { position: fixed; width: 6px; height: 10px; border-radius: 1px; pointer-events: none; animation: fall ease-in forwards; }
   @keyframes fall { to { transform: translate(var(--dx), 70vh) rotate(540deg); opacity: 0; } }
+  /* Picker popup (docs/specs/picker-styles.md) */
+  .ui [hidden] { display: none !important; }
+  .psty-set { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .psty-set label { font-size: 14px; color: #1f1f1f; }
+  .psty-set select { height: 36px; border: 1px solid #c4c7c5; border-radius: 18px; padding: 0 12px; font: inherit; font-size: 13px; color: #1f1f1f; background: #fff; cursor: pointer; }
+  .psty { position: fixed; inset: 0; z-index: 10; background: rgba(12,12,18,.8); display: grid; place-items: center; animation: psty-fade .2s ease-out; }
+  .snackbar { z-index: 11; }
+  .psty-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .psty-dlg { position: relative; width: 640px; height: 600px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: #fff; outline: none; animation: psty-rise .3s cubic-bezier(.2,1.2,.4,1); }
+  .psty-x { position: absolute; right: 0; top: 0; width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(255,255,255,.14); color: #fff; display: grid; place-items: center; z-index: 3; }
+  .psty-x:hover, .psty-b:hover { filter: brightness(1.15); }
+  .psty-style { height: 44px; display: flex; align-items: center; font-size: 13px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: #c4c7c5; }
+  .psty-stage { width: 640px; height: 380px; flex: none; position: relative; display: grid; place-items: center; }
+  .psty-win { display: flex; align-items: center; justify-content: center; gap: 16px; max-width: 620px; }
+  .psty-win > div { min-width: 0; }
+  .psty-head { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fdd663; }
+  .psty-name { font-family: "Google Sans", Roboto, Arial, sans-serif; font-size: 32px; line-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; animation: psty-pop .45s ease-out; }
+  .psty-acts { display: flex; gap: 12px; animation: psty-fade .4s ease-out; }
+  .psty-b { height: 44px; padding: 0 22px; border-radius: 22px; border: none; font-size: 14px; font-weight: 600; }
+  .psty-b.ghost { background: transparent; color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+  .psty-b.soft { background: rgba(255,255,255,.16); color: #fff; }
+  .psty-b.main { background: #a8c7fa; color: #062e6f; padding: 0 30px; }
+  .psty-b:focus-visible, .psty-x:focus-visible { outline: 3px solid #fdd663; outline-offset: 2px; }
+  .psty-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .psty-av { flex: none; border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 600; font-family: "Google Sans", Roboto, Arial, sans-serif; }
+  .psty-cf { position: absolute; top: -20px; width: 8px; height: 12px; border-radius: 2px; animation: psty-fall var(--t) cubic-bezier(.3,.6,.6,1) var(--d) forwards; }
+  .psty-coin { position: absolute; left: 50%; top: 40%; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3c4, #f9ab00 55%, #b06000); box-shadow: inset 0 0 0 2px #e8a317; animation: psty-coin var(--t) cubic-bezier(.25,.6,.5,1) var(--d) forwards; opacity: 0; }
+  @keyframes psty-fade { from { opacity: 0; } }
+  @keyframes psty-rise { from { opacity: 0; transform: translateY(24px) scale(.96); } }
+  @keyframes psty-pop { 0% { transform: scale(.7); opacity: 0; } 60% { transform: scale(1.06); opacity: 1; } }
+  @keyframes psty-fall { to { transform: translate(var(--dx), 110vh) rotate(720deg); opacity: .3; } }
+  @keyframes psty-coin { 0% { transform: translate(0, 0) scale(.5); opacity: 0; } 10% { opacity: 1; } 45% { transform: translate(var(--dx), var(--up)) scale(1); opacity: 1; } 100% { transform: translate(calc(var(--dx) * 1.6), 60vh); opacity: 0; } }
+  @keyframes psty-pulse { 0% { box-shadow: 0 0 0 0 rgba(253,214,99,.7); } 100% { box-shadow: 0 0 0 18px rgba(253,214,99,0); } }
+  /* PSTY-030 slot machine */
+  .ps-slot { position: relative; width: 500px; }
+  .ps-marq { background: linear-gradient(#7a1022, #4a0613); border-radius: 26px 26px 8px 8px; padding: 12px 16px 8px; box-shadow: inset 0 0 0 3px #d4a52c, 0 10px 30px rgba(0,0,0,.5); }
+  .ps-bulbs { display: flex; justify-content: space-between; padding: 0 4px 8px; }
+  .ps-bulbs i { width: 12px; height: 12px; border-radius: 50%; background: #8a6d1a; animation: psty-chase .6s infinite; }
+  .ps-bulbs i:nth-child(4n+2) { animation-delay: .15s; } .ps-bulbs i:nth-child(4n+3) { animation-delay: .3s; } .ps-bulbs i:nth-child(4n) { animation-delay: .45s; }
+  .ps-slot.won .ps-bulbs i { animation-duration: .3s; }
+  .ps-title { font-family: Impact, "Arial Black", sans-serif; font-size: 30px; letter-spacing: 3px; text-align: center; color: #fdd663; text-shadow: 0 2px 0 #7a4a00, 0 0 18px rgba(253,214,99,.6); }
+  .ps-body { margin-top: 6px; background: linear-gradient(#2b2b33, #17171c); border-radius: 10px 10px 20px 20px; padding: 14px; box-shadow: inset 0 0 0 3px #d4a52c, 0 14px 40px rgba(0,0,0,.6); }
+  .ps-win { position: relative; display: flex; gap: 8px; padding: 10px; background: #0a0a0d; border-radius: 12px; box-shadow: inset 0 0 0 3px #d4a52c; }
+  .ps-slot.won .ps-win { animation: psty-flash .6s infinite; }
+  .ps-reel { flex: 1; min-width: 0; height: 192px; overflow: hidden; background: #fff; border-radius: 8px; }
+  .ps-reel.av { flex: none; width: 84px; }
+  .ps-strip { transition: transform var(--t, 0ms) cubic-bezier(.12,.72,.22,1.04); }
+  .ps-row { height: 64px; display: flex; align-items: center; justify-content: center; color: #1f1f1f; font-size: 22px; font-weight: 800; padding: 0 8px; }
+  .ps-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ps-win::before, .ps-win::after { content: ""; position: absolute; left: 10px; right: 10px; height: 64px; pointer-events: none; z-index: 1; }
+  .ps-win::before { top: 10px; background: linear-gradient(rgba(10,10,13,.85), rgba(10,10,13,0)); border-radius: 8px 8px 0 0; }
+  .ps-win::after { bottom: 10px; background: linear-gradient(rgba(10,10,13,0), rgba(10,10,13,.85)); border-radius: 0 0 8px 8px; }
+  .ps-line { position: absolute; left: 10px; right: 10px; top: 74px; height: 64px; border-radius: 8px; box-shadow: inset 0 0 0 3px #fdd663; pointer-events: none; z-index: 2; }
+  .ps-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .ps-led { background: #0a0a0d; border-radius: 8px; padding: 6px 12px; box-shadow: inset 0 0 0 2px #3c3c44; }
+  .ps-led small { display: block; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #9aa0a6; }
+  .ps-led b { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 20px; color: #ff6d5e; text-shadow: 0 0 8px rgba(255,109,94,.7); }
+  .ps-note { font-family: Impact, "Arial Black", sans-serif; font-size: 18px; letter-spacing: 2px; color: #fdd663; }
+  .ps-lever { position: absolute; right: -34px; top: 110px; width: 24px; height: 170px; }
+  .ps-lever::after { content: ""; position: absolute; left: 2px; bottom: 0; width: 20px; height: 40px; border-radius: 6px; background: linear-gradient(90deg, #8a8f98, #d6d9de, #8a8f98); }
+  .ps-lever i { position: absolute; left: 9px; bottom: 30px; width: 6px; height: 120px; border-radius: 3px; background: linear-gradient(90deg, #8a8f98, #e8eaed, #8a8f98); transform-origin: 50% 100%; transition: transform .5s cubic-bezier(.3,1.6,.5,1); }
+  .ps-lever i::before { content: ""; position: absolute; left: -9px; top: -20px; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a80, #d93025 60%, #8c1c13); }
+  .ps-slot.pull .ps-lever i { transform: scaleY(-.5); transition-duration: .15s; }
+  @keyframes psty-chase { 50% { background: #fff3c4; box-shadow: 0 0 10px 3px rgba(253,214,99,.9); } }
+  @keyframes psty-flash { 50% { box-shadow: inset 0 0 0 3px #fff, 0 0 30px 8px rgba(253,214,99,.7); } }
+  /* PSTY-031 wheel */
+  .ps-wheelbox { position: relative; width: 340px; height: 360px; }
+  .ps-ptr { position: absolute; left: 50%; top: 0; margin-left: -16px; border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 28px solid #fff; z-index: 2; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
+  .ps-wheel { position: absolute; left: 0; top: 18px; width: 340px; height: 340px; border-radius: 50%; box-shadow: 0 0 0 8px #3c4043, 0 10px 30px rgba(0,0,0,.5); transition: transform 4s cubic-bezier(.1,.75,.12,1); }
+  .ps-wl { position: absolute; left: 50%; top: 50%; color: #fff; font-size: 15px; font-weight: 700; white-space: nowrap; max-width: 104px; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .ps-hub { position: absolute; left: 50%; top: 188px; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.4); display: grid; place-items: center; color: #0b57d0; }
+  /* PSTY-032 spotlight */
+  .ps-spot { width: 600px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .ps-grid { display: grid; justify-content: center; align-content: center; width: 600px; height: 310px; background: rgba(255,255,255,.06); border-radius: 16px; }
+  .ps-cell { display: grid; place-items: center; position: relative; }
+  .ps-face { border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 600; transition: transform .12s, box-shadow .12s, opacity .2s; }
+  .ps-spot.rolling .ps-face { opacity: .55; }
+  .ps-cell.lit { z-index: 2; }
+  .ps-cell.lit .ps-face { opacity: 1; transform: scale(var(--z)); box-shadow: 0 0 0 2px #fff, 0 0 0 5px #fdd663, 0 0 20px 6px rgba(253,214,99,.8); }
+  .ps-cell.won .ps-face { animation: psty-pulse 1s ease-out 2; }
+  .ps-tick { height: 36px; max-width: 560px; font-size: 24px; font-weight: 600; color: #c4c7c5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* PSTY-033 cards */
+  .ps-cards { position: relative; width: 600px; height: 380px; perspective: 1200px; }
+  .ps-card { position: absolute; left: 50%; top: 22px; width: 240px; height: 336px; margin-left: -120px; border-radius: 20px; transition: transform .3s ease-in-out, opacity .4s; }
+  .ps-back { background: #0842a0 repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 12px, transparent 12px 24px); display: grid; place-items: center; color: #fff; box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+  .ps-back.b0 { transform: translateX(-14px) rotate(-5deg); } .ps-back.b2 { transform: translateX(14px) rotate(5deg); }
+  .ps-cards.s1 .b0, .ps-cards.s2 .b2 { transform: translateX(-130px) rotate(-14deg); }
+  .ps-cards.s1 .b2, .ps-cards.s2 .b0 { transform: translateX(130px) rotate(14deg); }
+  .ps-cards.flip .ps-back { opacity: 0; }
+  .ps-topcard { transition: transform .45s cubic-bezier(.3,1.4,.5,1); }
+  .ps-cards.s1 .ps-topcard { transform: translateX(-60px); } .ps-cards.s2 .ps-topcard { transform: translateX(60px); }
+  .ps-cards.flip .ps-topcard { transform: translateY(-10px) scale(1.08); }
+  .ps-cards.party .ps-topcard { box-shadow: 0 0 0 10px rgba(253,214,99,.3), 0 0 60px 20px rgba(168,199,250,.5); }
+  .ps-in { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3,1.4,.5,1); }
+  .ps-cards.flip .ps-in { transform: rotateY(180deg); }
+  .ps-f { position: absolute; inset: 0; border-radius: 20px; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+  .ps-f.front { background: #0b57d0 repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 12px, transparent 12px 24px); color: #fff; }
+  .ps-f.face { background: #fff; color: #1f1f1f; transform: rotateY(180deg); box-shadow: inset 0 0 0 3px #fdd663; padding: 0 16px; text-align: center; }
+  .ps-f.face b { max-width: 100%; font-size: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ps-f.face small { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #0b57d0; }
+  .ps-rays { position: absolute; left: 50%; top: 50%; width: 560px; height: 560px; margin: -280px 0 0 -280px; border-radius: 50%; background: repeating-conic-gradient(rgba(253,214,99,.18) 0 10deg, transparent 10deg 24deg); -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); mask: radial-gradient(circle, #000 30%, transparent 70%); opacity: 0; transition: opacity .4s; animation: rot 14s linear infinite; }
+  .ps-cards.party .ps-rays { opacity: 1; }
+  /* PSTY-034 departure board */
+  .ps-board { width: 580px; background: #111214; border-radius: 16px; padding: 22px 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 0 1px #3c4043; }
+  .ps-bhead { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: #fdd663; }
+  .ps-brow { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; }
+  .ps-tile { height: 60px; border-radius: 5px; background: linear-gradient(#3c4043 0 49%, #202124 49% 51%, #35363a 51%); color: #9aa0a6; font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-size: 30px; display: grid; place-items: center; }
+  .ps-tile.set { color: #fff; }
+  /* PSTY-035 countdown */
+  .ps-count { position: relative; width: 220px; height: 220px; display: grid; place-items: center; }
+  .ps-ring { position: absolute; inset: 0; border-radius: 50%; -webkit-mask: radial-gradient(circle, transparent 92px, #000 93px); mask: radial-gradient(circle, transparent 92px, #000 93px); }
+  .ps-num { position: relative; font-size: 120px; font-weight: 800; color: #fff; animation: psty-num .8s ease-out; }
+  .ps-pop { animation: psty-pop .5s ease-out; }
+  .ps-pop .psty-av { box-shadow: 0 0 0 8px rgba(168,199,250,.5); }
+  @keyframes psty-num { 0% { transform: scale(1.6); opacity: 0; } 30% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .psty, .psty-dlg, .psty-name, .psty-acts, .ps-pop { animation: none; } }
 </style>
 
 <div class="ui">
@@ -922,6 +1039,11 @@
           <button data-m="round" class="active">Everyone once</button>
           <button data-m="random">Fully random</button>
         </div>
+        <div class="psty-set">
+          <label for="pickStyle">Animation</label>
+          <select id="pickStyle"></select>
+        </div>
+        <div class="muted" style="margin-top:4px">Surprise me picks a different animation each time.</div>
         <div class="actions">
           <button class="btn primary grow" id="pickBtn">Pick next speaker</button>
           <button class="btn text" id="resetRound">Reset</button>
@@ -954,6 +1076,22 @@
       </div>
     </div>
   </section>
+
+  <div class="psty" id="psty" hidden>
+    <div class="psty-fx" id="pstyFx"></div>
+    <div class="psty-dlg" id="pstyDlg" role="dialog" aria-modal="true" aria-label="Picking the next speaker" tabindex="-1">
+      <button class="psty-x" id="pstyClose" aria-label="Close" title="Close">${icon("close", 22)}</button>
+      <div class="psty-style" id="pstyStyle"></div>
+      <div class="psty-stage" id="pstyStage"></div>
+      <div class="psty-win" id="pstyWin" hidden></div>
+      <div class="psty-acts" id="pstyActs" hidden>
+        <button class="psty-b ghost" id="pstySkip">Skip, not here</button>
+        <button class="psty-b soft" id="pstyAgain">Pick again</button>
+        <button class="psty-b main" id="pstyDone">Done</button>
+      </div>
+      <div class="psty-live" id="pstyLive" aria-live="polite"></div>
+    </div>
+  </div>
 
   <div class="snackbar" id="snack"></div>
 </div>`);
@@ -1154,42 +1292,245 @@
     b.disabled = on;
   }
 
-  let rolling = false;
-  function pickSpeaker({ announce = true } = {}) {
+  /* ---------- Picker popup (docs/specs/picker-styles.md, PSTY-001…035) ---------- */
+  // The winner is always chosen first by pickSpeaker() (SPK-010…013); the popup only reveals it (PSTY-011).
+  const PSTY = { surprise: "Surprise me", slot: "Slot machine", wheel: "Wheel", spotlight: "Spotlight", cards: "Cards", board: "Departure board", countdown: "Countdown" };
+  const PSTY_STYLES = ["slot", "wheel", "spotlight", "cards", "board", "countdown"];
+  let pickStyle = store.get("pickStyle", "surprise");
+  if (pickStyle !== "surprise" && !PSTY_STYLES.includes(pickStyle)) pickStyle = "surprise"; // PSTY-002
+  const pop = { open: false, revealed: false, winner: null, style: null, last: null, inCall: false, timers: [] };
+  const popLater = (fn, ms) => { pop.timers.push(setTimeout(fn, ms)); };
+  const popStop = () => { pop.timers.forEach(clearTimeout); pop.timers = []; };
+  const reducedMotion = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
+  const nameParts = (n) => { const p = n.trim().split(/\s+/); return [p[0] || "", p.slice(1).join(" ")]; };
+  const avHTML = (n, size) => `<span class="psty-av" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.36)}px;background:${avatarColor(n)}">${esc(initials(n))}</span>`;
+  // PSTY-013: at most k names, always including the winner, in random order.
+  const sampleWith = (list, k, must) => {
+    const out = shuffle(list.filter((n) => n !== must)).slice(0, Math.max(0, k - 1));
+    out.splice(Math.floor(Math.random() * (out.length + 1)), 0, must);
+    return out;
+  };
+  // PSTY-003 / PSTY-004: a fixed style, or a random one that never repeats the previous pick's style.
+  const nextStyle = () => (pickStyle !== "surprise" ? pickStyle : pick(PSTY_STYLES.filter((s) => s !== pop.last)));
+
+  // Each renderer draws its animation into the stage, schedules it with popLater() and returns
+  // { ms: time until the reveal (≤ 5000, PSTY-012), head: reveal headline, avatar?: false, reveal?: fn }.
+  const RENDER = {
+    slot(stage, w, draw, info) { // PSTY-030: 3 reels from a random sample, ≤ 40 rows each (PSTY-013)
+      const T = [26, 32, 38];
+      const strips = T.map((t) => { const a = []; for (let i = 0; i < t; i++) a.push(pick(draw)); a.push(w, pick(draw)); return a; });
+      const row = (n, k) => `<div class="ps-row" data-n="${esc(n)}">${k === 0 ? avHTML(n, 48) : `<span>${esc(nameParts(n)[k - 1]) || "&nbsp;"}</span>`}</div>`;
+      setHTML(stage, `<div class="ps-slot"><div class="ps-marq"><div class="ps-bulbs">${"<i></i>".repeat(16)}</div><div class="ps-title">SPARK JACKPOT</div></div>
+        <div class="ps-body"><div class="ps-win">${strips.map((s, k) => `<div class="ps-reel${k === 0 ? " av" : ""}"><div class="ps-strip">${s.map((n) => row(n, k)).join("")}</div></div>`).join("")}<div class="ps-line"></div></div>
+        <div class="ps-foot"><div class="ps-led"><small>${info.label}</small><b>${info.value}</b></div><div class="ps-note">GOOD LUCK!</div></div></div>
+        <div class="ps-lever"><i></i></div></div>`);
+      const box = stage.firstElementChild, durs = [1700, 2300, 2900];
+      box.classList.add("pull");
+      popLater(() => box.classList.remove("pull"), 350);
+      popLater(() => stage.querySelectorAll(".ps-strip").forEach((el, i) => {
+        el.style.setProperty("--t", durs[i] + "ms");
+        el.style.transform = `translateY(${-(T[i] - 1) * 64}px)`; // row T (the winner) on the payline
+      }), 40);
+      return { ms: 3000, head: `Jackpot! ${nameParts(w)[0]}, you're up`, reveal: () => box.classList.add("won") };
+    },
+    wheel(stage, w, draw) { // PSTY-031: ≤ 12 slices; bigger draws get a shortlist that always holds the winner
+      const COLORS = ["#1a73e8", "#188038", "#e37400", "#a142f4", "#d93025", "#007b83"];
+      const big = draw.length > 12;
+      const slots = big ? sampleWith(draw, 12, w) : shuffle(draw);
+      const m = slots.length, deg = 360 / m;
+      const col = (i) => COLORS[(i + (m % 6 === 1 && i === m - 1 ? 1 : 0)) % 6];
+      const stops = slots.map((_, i) => `${col(i)} ${i * deg}deg ${(i + 1) * deg}deg`).join(",");
+      const r = m > 8 ? 110 : 100;
+      const turn = 360 * 7 - (slots.indexOf(w) * deg + deg / 2); // final rotation: the winner's slice under the pointer
+      const place = (i) => { // labels that end up on the left half are turned 180° so no name reads upside down at rest
+        const a = i * deg + deg / 2 - 90, end = (a + turn) % 360;
+        return end > 90 && end < 270 ? `rotate(${a - 180}deg) translateX(${-r}px)` : `rotate(${a}deg) translateX(${r}px)`;
+      };
+      setHTML(stage, `<div class="ps-wheelbox"><div class="ps-ptr"></div><div class="ps-wheel" style="background:conic-gradient(${stops})">${slots.map((n, i) =>
+        `<span class="ps-wl" data-n="${esc(n)}" style="transform:translate(-50%,-50%) ${place(i)}">${esc(nameParts(n)[0])}</span>`).join("")}</div><div class="ps-hub">${icon("spark", 28)}</div></div>`);
+      const wheel = stage.querySelector(".ps-wheel"), labels = [...stage.querySelectorAll(".ps-wl")];
+      const label = (el, n) => { el.textContent = nameParts(n)[0]; el.dataset.n = n; };
+      let start = 40;
+      if (big) { // shuffle names onto the wheel, then settle on the shortlist
+        for (let k = 0; k < 8; k++) popLater(() => labels.forEach((el) => label(el, pick(draw))), k * 90);
+        popLater(() => labels.forEach((el, i) => label(el, slots[i])), 760);
+        start = 800;
+      }
+      popLater(() => { wheel.style.transform = `rotate(${turn}deg)`; }, start);
+      return { ms: start + 4100, head: "The wheel has spoken" };
+    },
+    spotlight(stage, w, draw) { // PSTY-032: ≤ 200 faces in a grid that shrinks to fit
+      const faces = draw.length > 200 ? sampleWith(draw, 200, w) : draw;
+      const n = faces.length, W = 576, H = 290;
+      let c = 1;
+      while (Math.ceil(n / c) * (W / c) > H) c++;
+      const cell = Math.floor(W / c), size = Math.min(96, cell - (cell > 34 ? 8 : 3));
+      setHTML(stage, `<div class="ps-spot"><div class="ps-grid" style="grid-template-columns:repeat(${c},${cell}px)">${faces.map((f) =>
+        `<div class="ps-cell" data-n="${esc(f)}" style="width:${cell}px;height:${cell}px;--z:${size > 60 ? 1.15 : 1.9}"><span class="ps-face" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.36)}px;background:${avatarColor(f)}">${size >= 26 ? esc(initials(f)) : ""}</span></div>`).join("")}</div><div class="ps-tick"></div></div>`);
+      const box = stage.firstElementChild, cells = [...stage.querySelectorAll(".ps-cell")], tickEl = stage.querySelector(".ps-tick");
+      let lit = null;
+      const light = (i) => { if (lit) lit.classList.remove("lit"); lit = cells[i]; lit.classList.add("lit"); tickEl.textContent = faces[i]; };
+      const steps = n > 6 ? 20 : 16, grow = n > 6 ? 1.13 : 1.17;
+      let delay = n > 6 ? 35 : 60, at = 0, cur = -1;
+      box.classList.add("rolling");
+      for (let s = 0; s < steps; s++) {
+        const i = n > 1 && cur >= 0 ? (cur + 1 + Math.floor(Math.random() * (n - 1))) % n : Math.floor(Math.random() * n); // never the same face twice in a row
+        cur = i;
+        popLater(() => light(i), at);
+        at += delay; delay *= grow;
+      }
+      const wi = faces.indexOf(w);
+      return { ms: Math.round(at), head: "The mic goes to", reveal: () => { box.classList.remove("rolling"); light(wi); cells[wi].classList.add("won"); } };
+    },
+    cards(stage, w) { // PSTY-033
+      setHTML(stage, `<div class="ps-cards"><div class="ps-rays"></div>${[0, 1, 2].map((i) => `<div class="ps-card ps-back b${i}">${icon("spark", 56)}</div>`).join("")}
+        <div class="ps-card ps-topcard"><div class="ps-in"><div class="ps-f front">${icon("spark", 72)}</div>
+        <div class="ps-f face">${avHTML(w, 104)}<b data-n="${esc(w)}">${esc(w)}</b><small>You're up!</small></div></div></div></div>`);
+      const box = stage.firstElementChild;
+      [["s1", 300], ["s2", 650], ["s3", 1000], ["flip", 1250]].forEach(([c, t]) => popLater(() => { box.classList.remove("s1", "s2", "s3"); box.classList.add(c); }, t));
+      return { ms: 1900, head: "Next speaker", avatar: false, reveal: () => box.classList.add("party") };
+    },
+    board(stage, w) { // PSTY-034: split-flap letters settle left to right
+      const rows = nameParts(w).map((t) => [...t.toUpperCase().padEnd(11, " ")].slice(0, 11));
+      setHTML(stage, `<div class="ps-board"><div class="ps-bhead"><span>NOW SPEAKING</span><span>GATE 1</span></div>${rows.map(() => `<div class="ps-brow">${'<div class="ps-tile"></div>'.repeat(11)}</div>`).join("")}</div>`);
+      const tiles = [...stage.querySelectorAll(".ps-brow")].map((r) => [...r.children]);
+      const A = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
+      const paint = (t) => rows.forEach((chars, r) => chars.forEach((ch, i) => {
+        const done = t >= (r ? 16 : 6) + i * 2;
+        tiles[r][i].textContent = done ? ch : A[(t * 7 + i * 3 + r * 5) % A.length];
+        tiles[r][i].classList.toggle("set", done);
+      }));
+      for (let t = 0; t <= 40; t++) popLater(() => paint(t), t * 50);
+      return { ms: 2050, head: "Now speaking" };
+    },
+    countdown(stage, w) { // PSTY-035
+      setHTML(stage, `<div class="ps-count"><div class="ps-ring"></div><div class="ps-num"></div></div>`);
+      const ring = stage.querySelector(".ps-ring"), num = stage.querySelector(".ps-num");
+      const set = (k) => {
+        num.textContent = k;
+        num.style.animation = "none"; num.getBoundingClientRect(); num.style.animation = ""; // restart the pop-in
+        ring.style.background = `conic-gradient(#a8c7fa ${(4 - k) * 120}deg, rgba(255,255,255,.15) 0)`;
+      };
+      set(3);
+      popLater(() => set(2), 800);
+      popLater(() => set(1), 1600);
+      return { ms: 2400, head: "Take it away!", avatar: false, reveal: () => setHTML(stage, `<div class="ps-pop">${avHTML(w, 140)}</div>`) };
+    },
+  };
+
+  const fitPicker = () => { // PSTY decision 4: scale down to fit small windows, never scroll
+    const k = Math.min(1, (innerWidth - 32) / 660, (innerHeight - 32) / 620);
+    $("#pstyDlg").style.zoom = k < 1 ? String(Math.max(0.4, k)) : "";
+  };
+  function confetti(coins) { // PSTY-015
+    const PAL = ["#fdd663", "#ff6d5e", "#a8c7fa", "#81c995", "#ffffff", "#c58af9"], bits = [];
+    for (let i = 0; i < 70; i++) bits.push(`<i class="psty-cf" style="left:${(i * 53) % 100}%;background:${PAL[i % 6]};--dx:${((i * 29) % 160) - 80}px;--t:${(1.6 + (i % 7) * 0.22).toFixed(2)}s;--d:${((i % 10) * 0.06).toFixed(2)}s${i % 5 === 0 ? ";border-radius:50%" : ""}"></i>`);
+    if (coins) for (let i = 0; i < 24; i++) bits.push(`<i class="psty-coin" style="--dx:${((i * 47) % 360) - 180}px;--up:${-120 - (i % 5) * 40}px;--t:${(1.6 + (i % 4) * 0.2).toFixed(2)}s;--d:${((i % 6) * 0.05).toFixed(2)}s"></i>`);
+    setHTML($("#pstyFx"), bits.join(""));
+  }
+  const markPicked = (w) => { // the panel's picker card shows the winner (PSTY-019, PSTY-020)
+    showPicked(w);
+    $("#picker").classList.remove("rolling"); $("#picker").classList.add("done");
+    renderPeople();
+  };
+
+  function openPicker(winner, active) { // PSTY-010
+    popStop();
+    const style = nextStyle();
+    Object.assign(pop, { style, last: style, winner, revealed: false });
+    if (!pop.open) { pop.open = true; pop.inCall = inCall(); $("#psty").hidden = false; }
+    $("#pickBtn").disabled = true;
+    $("#picker").classList.remove("done"); $("#picker").classList.add("rolling");
+    // PSTY-014: in Everyone once only people still to speak (plus the winner) appear in the animation.
+    const draw = mode === "round" ? active.filter((n) => n === winner || !spoken.has(n)) : active;
+    const left = active.filter((n) => !spoken.has(n)).length;
+    const info = mode === "round" ? { label: "STILL TO SPEAK", value: `${left} / ${active.length}` } : { label: "IN THE DRAW", value: String(active.length) };
+    const dlg = $("#pstyDlg");
+    dlg.dataset.style = style;
+    $("#pstyStyle").textContent = PSTY[style]; // PSTY-005
+    $("#pstyWin").hidden = true; $("#pstyActs").hidden = true; $("#pstyLive").textContent = "";
+    $("#pstyFx").replaceChildren();
+    const stage = $("#pstyStage");
+    stage.replaceChildren();
+    fitPicker();
+    dlg.focus();
+    if (reducedMotion()) { revealPicker({ head: "Next speaker" }, true); return; } // PSTY-022
+    const r = RENDER[style](stage, winner, draw, info);
+    popLater(() => revealPicker(r, false), r.ms);
+  }
+  function revealPicker(r, still) { // PSTY-015, PSTY-016, PSTY-023
+    pop.revealed = true;
+    const w = pop.winner;
+    if (r.reveal) r.reveal();
+    markPicked(w);
+    const win = $("#pstyWin");
+    setHTML(win, `${r.avatar === false ? "" : avHTML(w, 72)}<div><div class="psty-head"></div><div class="psty-name"></div></div>`);
+    win.querySelector(".psty-head").textContent = r.head;
+    win.querySelector(".psty-name").textContent = w;
+    win.hidden = false;
+    $("#pstyLive").textContent = `Next speaker: ${w}`;
+    if (!still) confetti(pop.style === "slot");
+    $("#pstyActs").hidden = false;
+    $("#pstyDone").focus();
+  }
+  function closePicker({ keep = true } = {}) { // PSTY-019, PSTY-020, PSTY-026
+    if (!pop.open) return;
+    popStop();
+    if (keep && !pop.revealed) markPicked(pop.winner);
+    $("#picker").classList.remove("rolling");
+    pop.open = false; pop.revealed = false;
+    $("#psty").hidden = true;
+    $("#pstyStage").replaceChildren(); $("#pstyFx").replaceChildren();
+    $("#pickBtn").disabled = false;
+    if (keep) $("#pickBtn").focus(); // PSTY-023
+  }
+  // PSTY-026: leaving the call (the popup was opened in it) or switching meeting closes the popup.
+  function pickerLeft({ meetingChanged = false } = {}) { if (pop.open && (meetingChanged || pop.inCall)) closePicker({ keep: false }); }
+
+  $("#pstyClose").addEventListener("click", () => closePicker());
+  $("#pstyDone").addEventListener("click", () => closePicker());
+  $("#pstyAgain").addEventListener("click", () => { if (pop.revealed) pickSpeaker(); }); // PSTY-018
+  $("#pstySkip").addEventListener("click", () => { // PSTY-017: the skipped person isn't counted as spoken
+    if (!pop.revealed) return;
+    const w = pop.winner;
+    if (!roster.active().some((n) => n !== w)) { toast("No one else to pick"); return; }
+    spoken.delete(w); saveSpoken();
+    pickSpeaker({ avoid: w });
+  });
+  // PSTY-023 / PSTY-025: keys are handled only inside the open popup and never reach Meet.
+  $("#pstyDlg").addEventListener("keydown", (e) => {
+    e.stopPropagation();
+    if (e.key === "Escape") { e.preventDefault(); closePicker(); return; }
+    if (e.key !== "Tab") return;
+    const f = [...$("#pstyDlg").querySelectorAll("button")].filter((b) => !b.closest("[hidden]"));
+    const i = f.indexOf(root.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  });
+  $("#pstyDlg").addEventListener("keyup", (e) => e.stopPropagation());
+
+  const styleSel = $("#pickStyle"); // PSTY-001, PSTY-002
+  setHTML(styleSel, Object.entries(PSTY).map(([k, v]) => `<option value="${k}">${v}</option>`).join(""));
+  styleSel.value = pickStyle;
+  styleSel.addEventListener("change", () => { pickStyle = PSTY[styleSel.value] ? styleSel.value : "surprise"; store.set("pickStyle", pickStyle); });
+  ["keydown", "keyup"].forEach((t) => styleSel.addEventListener(t, (e) => e.stopPropagation()));
+
+  function pickSpeaker({ announce = true, avoid = null } = {}) {
+    if (announce && pop.open && !pop.revealed) return null; // PSTY-021: one pick at a time
     const active = roster.active();
     if (!active.length) { toast("No participants yet — sync or add names"); showView("people"); return null; }
-    let pool = mode === "round" ? active.filter((n) => !spoken.has(n)) : active;
-    if (!pool.length) { spoken.clear(); saveSpoken(); pool = active; toast("Everyone has spoken — starting a new round"); }
+    const cands = avoid && active.length > 1 ? active.filter((n) => n !== avoid) : active; // PSTY-017
+    let pool = mode === "round" ? cands.filter((n) => !spoken.has(n)) : cands;
+    if (!pool.length) { spoken.clear(); saveSpoken(); pool = cands; toast("Everyone has spoken — starting a new round"); }
     const winner = pick(pool);
     if (mode === "round") { spoken.add(winner); saveSpoken(); }
-    if (announce) animatePick(winner, active); else { showPicked(winner); renderPeople(); }
+    if (announce) openPicker(winner, active); else { showPicked(winner); renderPeople(); }
     return winner;
   }
   function showPicked(n) {
     $("#pickedAvatar").style.background = avatarColor(n);
     $("#pickedAvatar").textContent = initials(n);
     $("#pickedName").textContent = n;
-  }
-  function animatePick(winner, pool) {
-    if (rolling) return;
-    rolling = true;
-    const p = $("#picker"); p.classList.remove("done"); p.classList.add("rolling");
-    $("#pickBtn").disabled = true;
-    let delay = 50, i = 0;
-    const steps = 16;
-    const tick = () => {
-      if (i++ < steps) {
-        showPicked(pool.length > 1 ? pick(pool) : winner);
-        delay *= 1.14;
-        return setTimeout(tick, delay);
-      }
-      showPicked(winner);
-      p.classList.remove("rolling"); p.classList.add("done");
-      $("#pickBtn").disabled = false;
-      rolling = false;
-      renderPeople();
-    };
-    tick();
   }
   $("#pickBtn").addEventListener("click", () => pickSpeaker());
   $("#resetRound").addEventListener("click", () => {
